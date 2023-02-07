@@ -2,6 +2,7 @@ resolver:
   url: https://github.com/commercialhaskell/stackage-snapshots/raw/master/lts/19/33.yaml
 
 packages:
+  - compile-builder
   - hsnixpkgs
 
 extra-deps:
