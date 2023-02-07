@@ -1,0 +1,38 @@
+name: hsnixpkgs
+version: 0.1.0.0
+author: "Jose Lane"
+license: MIT
+maintainer: dariankline@outlook.com
+
+ghc-options:
+  - -fenable-th-splice-warnings
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+
+default-extensions:
+  - OverloadedStrings
+
+dependencies:
+  - base ^>= 4.15
+  - text ^>= 1.2
+  - hsnix-core
+
+library:
+  source-dirs: src
+  dependencies:
+    - template-haskell ^>= 2.17
+    - singletons ^>= 3.0
+    - singletons-base ^>= 3.0
+  default-extensions:
+    - DataKinds
+    - KindSignatures
+    - ScopedTypeVariables
+    - StandaloneDeriving
+    - TypeApplications
