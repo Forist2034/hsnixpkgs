@@ -1,0 +1,30 @@
+name: hsnixpkgs-boot-builderlib
+version: 0.1.0.0
+author: "Jose Lane"
+license: MIT
+maintainer: dariankline@outlook.com
+
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+
+default-extensions:
+  - OverloadedStrings
+
+dependencies:
+  - base ^>= 4.15
+
+library:
+  source-dirs: src
+  dependencies:
+    - mtl ^>= 2.2
+  when:
+    - condition: false
+      other-modules: Paths_hsnixpkgs_boot_builderlib

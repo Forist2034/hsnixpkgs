@@ -35,6 +35,7 @@ library:
     - unordered-containers ^>= 0.2
     - singletons ^>= 3.0
     - singletons-base ^>= 3.0
+    - hsnixpkgs-boot-builderlib
   default-extensions:
     - ApplicativeDo
     - DataKinds
