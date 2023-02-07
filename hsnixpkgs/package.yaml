@@ -35,6 +35,7 @@ library:
     - singletons ^>= 3.0
     - singletons-base ^>= 3.0
   default-extensions:
+    - ApplicativeDo
     - DataKinds
     - KindSignatures
     - ScopedTypeVariables
