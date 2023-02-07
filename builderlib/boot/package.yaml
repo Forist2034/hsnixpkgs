@@ -31,8 +31,10 @@ library:
     - time ^>= 1.9
     - process ^>= 1.6
     - unix ^>= 2.7
+    - deepseq ^>= 1.4
     - exceptions ^>= 0.10
     - mtl ^>= 2.2
+    - template-haskell ^>= 2.17
   when:
     - condition: false
       other-modules: Paths_hsnixpkgs_boot_builderlib
