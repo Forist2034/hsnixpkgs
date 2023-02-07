@@ -22,6 +22,7 @@ default-extensions:
 dependencies:
   - base ^>= 4.15
   - text ^>= 1.2
+  - data-default ^>= 0.7
   - hsnix-core
 
 library:
