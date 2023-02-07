@@ -30,6 +30,7 @@ library:
   dependencies:
     - template-haskell ^>= 2.17
     - mtl ^>= 2.2
+    - containers ^>= 0.6
     - hashable ^>= 1.3
     - unordered-containers ^>= 0.2
     - singletons ^>= 3.0
@@ -41,3 +42,7 @@ library:
     - ScopedTypeVariables
     - StandaloneDeriving
     - TypeApplications
+  other-modules:
+    - HsNixPkgs.HsBuilder.Internal.BuildMod
+    - HsNixPkgs.HsBuilder.Internal.BuildMod.TH
+    - HsNixPkgs.HsBuilder.Internal.BuildMod.Types
