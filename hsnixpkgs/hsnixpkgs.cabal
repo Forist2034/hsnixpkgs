@@ -47,6 +47,7 @@ library
       HsNixPkgs.StdEnv.BootTools.TH
       HsNixPkgs.StdEnv.Linux.GLibc.Amd64
       HsNixPkgs.StdEnv.Linux.SupportTools.Amd64
+      HsNixPkgs.StdEnv.MakeDeriv
       HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
       HsNixPkgs.StdEnv.StdEnv
       HsNixPkgs.System
