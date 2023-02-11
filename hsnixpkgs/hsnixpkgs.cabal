@@ -1,0 +1,87 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           hsnixpkgs
+version:        0.1.0.0
+author:         Jose Lane
+maintainer:     dariankline@outlook.com
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+
+library
+  exposed-modules:
+      HsNixPkgs.Build.Fixup
+      HsNixPkgs.Build.Fixup.CompressManPages
+      HsNixPkgs.Build.Fixup.MakeSymlinkRelative
+      HsNixPkgs.Build.Fixup.Move
+      HsNixPkgs.Build.Fixup.MoveDocs
+      HsNixPkgs.Build.Fixup.PatchShebang
+      HsNixPkgs.Build.Fixup.PruneLibtoolFiles
+      HsNixPkgs.Build.Fixup.Strip
+      HsNixPkgs.Build.Hook
+      HsNixPkgs.Build.Main
+      HsNixPkgs.Build.Patch
+      HsNixPkgs.Build.Phase
+      HsNixPkgs.Build.Unpack
+      HsNixPkgs.Dependent
+      HsNixPkgs.Dependent.TH
+      HsNixPkgs.Dependent.Types
+      HsNixPkgs.Develop.C.Library
+      HsNixPkgs.Develop.Haskell.Package
+      HsNixPkgs.Develop.NativeLibrary
+      HsNixPkgs.ExtendDrv
+      HsNixPkgs.ExtendDrv.FileDrv
+      HsNixPkgs.HsBuilder.DepStr
+      HsNixPkgs.HsBuilder.Generate
+      HsNixPkgs.SetupHook
+      HsNixPkgs.SetupHook.Executable
+      HsNixPkgs.StdEnv.BootTools.Derivation
+      HsNixPkgs.StdEnv.BootTools.RequireFile
+      HsNixPkgs.StdEnv.BootTools.TH
+      HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
+      HsNixPkgs.StdEnv.StdEnv
+      HsNixPkgs.System
+      HsNixPkgs.System.Abi
+      HsNixPkgs.System.Cpu
+      HsNixPkgs.System.Kernel
+      HsNixPkgs.System.System
+      HsNixPkgs.System.Vendor
+      HsNixPkgs.Util
+  other-modules:
+      HsNixPkgs.HsBuilder.Internal.BuildMod
+      HsNixPkgs.HsBuilder.Internal.BuildMod.TH
+      HsNixPkgs.HsBuilder.Internal.BuildMod.Types
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      ApplicativeDo
+      DataKinds
+      KindSignatures
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+  ghc-options: -fenable-th-splice-warnings -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base ==4.15.*
+    , bytestring ==0.10.*
+    , containers ==0.6.*
+    , data-default ==0.7.*
+    , directory ==1.3.*
+    , filepath ==1.4.*
+    , hashable ==1.3.*
+    , hsnix-core
+    , hsnixpkgs-boot-builderlib
+    , hsnixpkgs-stdenv-pack
+    , mtl ==2.2.*
+    , singletons ==3.0.*
+    , singletons-base ==3.0.*
+    , template-haskell ==2.17.*
+    , text ==1.2.*
+    , unordered-containers ==0.2.*
+    , yaml ==0.11.*
+  default-language: Haskell2010
