@@ -191,7 +191,7 @@ compileBuilder name env cfg ext main =
                         depsTargetTarget hsD
                       ]
                   )
-            gh <- ED.getStorePathStr (ghc env)
+            gh <- ED.getStorePathStr (stdEnvGhc env)
             bb <- ED.getStorePathStr (compileBuilderBin env)
             modEnvs <- traverse (\((_, e), DepStr v) -> (e,) <$> v) mModEnvs
             pure

@@ -11,6 +11,9 @@ maintainer:     dariankline@outlook.com
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
+extra-source-files:
+    stdenv/linux/amd64/glibc.yaml
+    stdenv/linux/amd64/support-tool.yaml
 
 library
   exposed-modules:
@@ -42,6 +45,8 @@ library
       HsNixPkgs.StdEnv.BootTools.Derivation
       HsNixPkgs.StdEnv.BootTools.RequireFile
       HsNixPkgs.StdEnv.BootTools.TH
+      HsNixPkgs.StdEnv.Linux.GLibc.Amd64
+      HsNixPkgs.StdEnv.Linux.SupportTools.Amd64
       HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
       HsNixPkgs.StdEnv.StdEnv
       HsNixPkgs.System

@@ -23,7 +23,7 @@ singletons
 type StdEnvGhc = Ghc_9_0_2
 
 data StdEnv (s :: StageSpec) (b :: System) (h :: System) (t :: System) m = StdEnv
-  { ghc :: DrvOutput b b m,
+  { stdEnvGhc :: DrvOutput b b m,
     compileBuilderBin :: DrvOutput b b m,
     builderLibBoot :: HsPackage StdEnvGhc b b b m,
     stdEnvExec :: SimpleDeps [] Executable b h t m

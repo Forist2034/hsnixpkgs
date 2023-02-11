@@ -4,6 +4,9 @@ author: "Jose Lane"
 license: MIT
 maintainer: dariankline@outlook.com
 
+extra-source-files:
+  - stdenv/**/**/*
+
 ghc-options:
   - -fenable-th-splice-warnings
   - -Wall
