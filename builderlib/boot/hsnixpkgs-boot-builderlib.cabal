@@ -20,6 +20,7 @@ library
       HsNixPkgs.Boot.Build.Fixup.MakeSymlinkRelative.FilePath
       HsNixPkgs.Boot.Build.Fixup.Move
       HsNixPkgs.Boot.Build.Fixup.MoveDocs
+      HsNixPkgs.Boot.Build.Fixup.MultipleOutput
       HsNixPkgs.Boot.Build.Fixup.PatchShebang
       HsNixPkgs.Boot.Build.Fixup.PruneLibtoolFiles
       HsNixPkgs.Boot.Build.Fixup.Strip
@@ -30,6 +31,7 @@ library
       HsNixPkgs.Boot.Build.Unpack
       HsNixPkgs.Boot.Build.Util
       HsNixPkgs.Boot.Build.Util.FileType
+      HsNixPkgs.Boot.StdEnv.PropagatedDep
   hs-source-dirs:
       src
   default-extensions:

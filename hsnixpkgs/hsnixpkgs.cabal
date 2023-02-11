@@ -22,11 +22,13 @@ library
       HsNixPkgs.Build.Fixup.MakeSymlinkRelative
       HsNixPkgs.Build.Fixup.Move
       HsNixPkgs.Build.Fixup.MoveDocs
+      HsNixPkgs.Build.Fixup.MultiOutput
       HsNixPkgs.Build.Fixup.PatchShebang
       HsNixPkgs.Build.Fixup.PruneLibtoolFiles
       HsNixPkgs.Build.Fixup.Strip
       HsNixPkgs.Build.Hook
       HsNixPkgs.Build.Main
+      HsNixPkgs.Build.MultiOutput
       HsNixPkgs.Build.Patch
       HsNixPkgs.Build.Phase
       HsNixPkgs.Build.Unpack
