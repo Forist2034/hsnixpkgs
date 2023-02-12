@@ -35,6 +35,7 @@ library
       HsNixPkgs.Dependent
       HsNixPkgs.Dependent.TH
       HsNixPkgs.Dependent.Types
+      HsNixPkgs.Develop.BuildSystem.Gnu
       HsNixPkgs.Develop.C.Library
       HsNixPkgs.Develop.Haskell.Package
       HsNixPkgs.Develop.NativeLibrary
@@ -42,6 +43,7 @@ library
       HsNixPkgs.ExtendDrv.FileDrv
       HsNixPkgs.HsBuilder.DepStr
       HsNixPkgs.HsBuilder.Generate
+      HsNixPkgs.HsBuilder.OutputMod
       HsNixPkgs.SetupHook
       HsNixPkgs.SetupHook.Executable
       HsNixPkgs.StdEnv.BootTools.Derivation

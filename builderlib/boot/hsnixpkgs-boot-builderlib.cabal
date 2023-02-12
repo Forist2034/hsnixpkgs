@@ -31,6 +31,7 @@ library
       HsNixPkgs.Boot.Build.Unpack
       HsNixPkgs.Boot.Build.Util
       HsNixPkgs.Boot.Build.Util.FileType
+      HsNixPkgs.Boot.Develop.BuildSystem.Gnu
       HsNixPkgs.Boot.StdEnv.PropagatedDep
   hs-source-dirs:
       src
