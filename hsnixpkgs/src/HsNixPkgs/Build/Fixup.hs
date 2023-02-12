@@ -15,6 +15,7 @@ import HsNixPkgs.Build.Hook
 import HsNixPkgs.Build.Phase
 import HsNixPkgs.HsBuilder.DepStr
 import HsNixPkgs.HsBuilder.Generate
+import HsNixPkgs.HsBuilder.Util
 import Language.Haskell.TH
 
 data FixupP
@@ -29,23 +30,20 @@ fixupExpr ::
   [FixupTarget] ->
   Code HsQ (BIO ())
 fixupExpr h fs =
-  unsafeCodeCoerce
-    [|
-      B.makeWritable $(listE (unTypeCode . ftPath <$> fs))
-        >> $( unTypeCode
-                ( runHook
-                    h
-                    (unsafeCodeCoerce (doE (fmap (noBindS . runFixup) fs)))
-                )
-            )
-      |]
+  [||
+  B.makeWritable $$(listET (ftPath <$> fs))
+    >> $$( runHook
+             h
+             (unsafeCodeCoerce (doE (fmap (noBindS . unTypeCode . runFixup) fs)))
+         )
+  ||]
   where
     runFixup t =
-      [|
-        B.runFixup
-          $(unTypeCode (ftPath t))
-          $(listE (unTypeCode <$> ftFixupFunc t))
-        |]
+      [||
+      B.runFixup
+        $$(ftPath t)
+        $$(listET (ftFixupFunc t))
+      ||]
 
 mkFixupPhase :: Code HsQ (BIO ()) -> HsQ [Dec] -> ModuleM s mt (Code HsQ Phase)
 mkFixupPhase = newPhase "unpackPhase" "unpacking sources"

@@ -8,4 +8,4 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 pruneLibtoolFiles :: Code HsQ (FilePath -> BIO ())
-pruneLibtoolFiles = unsafeCodeCoerce [|B.pruneLibtoolFiles|]
+pruneLibtoolFiles = [||B.pruneLibtoolFiles||]

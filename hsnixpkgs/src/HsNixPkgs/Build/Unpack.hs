@@ -27,6 +27,7 @@ import HsNixPkgs.Build.Phase
 import HsNixPkgs.ExtendDrv
 import HsNixPkgs.HsBuilder.DepStr
 import HsNixPkgs.HsBuilder.Generate
+import HsNixPkgs.HsBuilder.Util
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import System.Directory
@@ -52,9 +53,9 @@ instance Default UnpackCfg where
           [ \t ->
               if
                   | any (`T.isSuffixOf` t) [".tar.xz", ".tar.lzma", ".txz"] ->
-                      Just (\s -> unsafeCodeCoerce [|B.unTarXz $(unTypeCode s)|])
+                      Just (\s -> [||B.unTarXz $$s||])
                   | any (`T.isSuffixOf` t) [".tar", ".tgz", ".tbz2", ".tbz"] ->
-                      Just (\s -> unsafeCodeCoerce [|B.unTar $(unTypeCode s)|])
+                      Just (\s -> [||B.unTar $$s||])
                   | otherwise -> Nothing
           ],
         makeSourcesWritable = True,
@@ -90,43 +91,40 @@ unpackExpr sources sourceRoot cfg = do
   pure
     ( runHook
         (unpackHook cfg)
-        ( unsafeCodeCoerce
-            [|
-              B.unpackFunc
-                $( listE
-                     ( NEL.toList
-                         ( NEL.zipWith
-                             ( \u@(_ :&: f) e ->
-                                 tupE
-                                   [ lift (T.unpack (fDrvName f)),
-                                     selectUnpack u e
-                                   ]
-                             )
-                             sources
-                             s
-                         )
-                     )
-                 )
-                $(lift sourceRoot)
-                $(lift (makeSourcesWritable cfg))
-              |]
-        )
+        [||
+        B.unpackFunc
+          $$( listET
+                ( NEL.toList
+                    ( NEL.zipWith
+                        ( \u@(_ :&: f) e ->
+                            [||
+                            ( $$(liftTyped (T.unpack (fDrvName f))),
+                              $$(selectUnpack u (unsafeCodeCoerce (varE e)))
+                            )
+                            ||]
+                        )
+                        sources
+                        s
+                    )
+                )
+            )
+          $$(liftTyped sourceRoot)
+          $$(liftTyped (makeSourcesWritable cfg))
+        ||]
     )
   where
     selectUnpack ::
       Sigma FileDrvType (TyCon1 (FileDeriv m)) ->
-      Name ->
-      HsQ Exp
-    selectUnpack (SDirectoryFDrv :&: _) e = [|copyFile $(varE e) "."|]
+      Code HsQ FilePath ->
+      Code HsQ (IO ())
+    selectUnpack (SDirectoryFDrv :&: _) e = [||copyFile $$e "."||]
     selectUnpack (SRegularFDrv :&: f) e =
-      unTypeCode
-        ( head
-            ( mapMaybe
-                (\uf -> uf (fDrvFilename f))
-                (unpackCmds cfg)
-            )
-            (unsafeCodeCoerce (varE e))
+      head
+        ( mapMaybe
+            (\uf -> uf (fDrvFilename f))
+            (unpackCmds cfg)
         )
+        e
 
 mkUnpackPhase :: Code HsQ (BIO ()) -> HsQ [Dec] -> ModuleM s mt (Code HsQ Phase)
 mkUnpackPhase = newPhase "unpackPhrase" "unpacking sources"

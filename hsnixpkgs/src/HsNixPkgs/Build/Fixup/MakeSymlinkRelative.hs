@@ -8,4 +8,4 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 makeSymlinkRelative :: Code HsQ (FilePath -> BIO ())
-makeSymlinkRelative = unsafeCodeCoerce [|B.makeSymlinkRelative|]
+makeSymlinkRelative = [||B.makeSymlinkRelative||]

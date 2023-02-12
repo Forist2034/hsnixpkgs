@@ -14,6 +14,7 @@ import HsNixPkgs.Boot.Build.Phase hiding (runPhases)
 import qualified HsNixPkgs.Boot.Build.Phase as B
 import HsNixPkgs.Build.Main (BIO)
 import HsNixPkgs.HsBuilder.Generate
+import HsNixPkgs.HsBuilder.Util
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
@@ -63,8 +64,4 @@ newPhase n d e ld =
     <$> declFun (phaseDecl n d e ld)
 
 runPhases :: [Code HsQ Phase] -> Code HsQ (BIO ())
-runPhases ps =
-  unsafeCodeCoerce
-    [|
-      B.runPhases $(listE (fmap unTypeCode ps))
-      |]
+runPhases ps = [||B.runPhases $$(listET ps)||]

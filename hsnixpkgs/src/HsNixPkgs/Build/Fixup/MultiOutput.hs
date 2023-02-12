@@ -12,18 +12,17 @@ multiOutputFixup ::
   MultiOutput (Code HsQ FilePath) ->
   Code HsQ (FilePath -> BIO ())
 multiOutputFixup m =
-  unsafeCodeCoerce
-    [|
-      B.multiOutputFixup
-        B.MultiOutput
-          { B.outDev = $(unTypeCode (outDev m)),
-            B.outBin = $(unTypeCode (outBin m)),
-            B.outInclude = $(unTypeCode (outInclude m)),
-            B.outLib = $(unTypeCode (outLib m)),
-            B.outDoc = $(unTypeCode (outDoc m)),
-            B.outDevDoc = $(unTypeCode (outDevDoc m)),
-            B.outMan = $(unTypeCode (outMan m)),
-            B.outDevMan = $(unTypeCode (outDevMan m)),
-            B.outInfo = $(unTypeCode (outInfo m))
-          }
-      |]
+  [||
+  B.multiOutputFixup
+    B.MultiOutput
+      { B.outDev = $$(outDev m),
+        B.outBin = $$(outBin m),
+        B.outInclude = $$(outInclude m),
+        B.outLib = $$(outLib m),
+        B.outDoc = $$(outDoc m),
+        B.outDevDoc = $$(outDevDoc m),
+        B.outMan = $$(outMan m),
+        B.outDevMan = $$(outDevMan m),
+        B.outInfo = $$(outInfo m)
+      }
+  ||]

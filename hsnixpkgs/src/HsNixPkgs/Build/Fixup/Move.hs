@@ -13,10 +13,10 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 moveLib64 :: Code HsQ (FilePath -> BIO ())
-moveLib64 = unsafeCodeCoerce [|B.moveLib64|]
+moveLib64 = [||B.moveLib64||]
 
 moveSbin :: Code HsQ (FilePath -> BIO ())
-moveSbin = unsafeCodeCoerce [|B.moveSbin|]
+moveSbin = [||B.moveSbin||]
 
 moveSystemdUserUnits :: Code HsQ (FilePath -> BIO ())
-moveSystemdUserUnits = unsafeCodeCoerce [|B.moveSystemdUserUnits|]
+moveSystemdUserUnits = [||B.moveSystemdUserUnits||]

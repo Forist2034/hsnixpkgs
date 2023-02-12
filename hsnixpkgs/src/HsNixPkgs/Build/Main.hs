@@ -12,4 +12,4 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 runBuildMain :: Code HsQ (B.BIO ()) -> Code HsQ (IO ())
-runBuildMain e = unsafeCodeCoerce [|B.runBuildMain $(unTypeCode e)|]
+runBuildMain e = [||B.runBuildMain $$e||]

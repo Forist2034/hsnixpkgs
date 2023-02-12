@@ -3,6 +3,7 @@
 module HsNixPkgs.Build.Hook (Hook (..), runHook) where
 
 import Data.Default
+import Data.Maybe
 import qualified HsNixPkgs.Boot.Build.Hook as B
 import HsNixPkgs.Build.Main (BIO)
 import HsNixPkgs.HsBuilder.Generate
@@ -23,11 +24,7 @@ mergeH ::
 mergeH Nothing Nothing = Nothing
 mergeH Nothing r = r
 mergeH l Nothing = l
-mergeH (Just l) (Just r) =
-  Just
-    ( unsafeCodeCoerce
-        [|$(unTypeCode l) >> $(unTypeCode r)|]
-    )
+mergeH (Just l) (Just r) = Just [||$$l >> $$r||]
 
 instance Semigroup (Hook t) where
   l <> r =
@@ -45,14 +42,11 @@ runHook ::
   Code HsQ (BIO ())
 runHook Hook {preHook = Nothing, postHook = Nothing} e = e
 runHook h e =
-  let pre = maybe [|pure ()|] unTypeCode (preHook h)
-      post = maybe [|pure ()|] unTypeCode (postHook h)
-   in unsafeCodeCoerce
-        [|
-          B.runHook
-            B.Hook
-              { B.preHook = $pre,
-                B.postHook = $post
-              }
-            $(unTypeCode e)
-          |]
+  [||
+  B.runHook
+    B.Hook
+      { B.preHook = $$(fromMaybe [||pure ()||] (preHook h)),
+        B.postHook = $$(fromMaybe [||pure ()||] (postHook h))
+      }
+    $$e
+  ||]

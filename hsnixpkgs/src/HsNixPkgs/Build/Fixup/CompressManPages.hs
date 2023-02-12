@@ -8,4 +8,4 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 compressManPages :: Code HsQ (FilePath -> BIO ())
-compressManPages = unsafeCodeCoerce [|B.compressManPages|]
+compressManPages = [||B.compressManPages||]

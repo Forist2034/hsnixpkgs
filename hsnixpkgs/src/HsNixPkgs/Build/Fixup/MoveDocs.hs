@@ -16,4 +16,4 @@ instance Default ForceShare where
   def = ForceShare ["man", "doc", "info"]
 
 moveToShare :: ForceShare -> Code HsQ (FilePath -> BIO ())
-moveToShare (ForceShare fs) = unsafeCodeCoerce [|B.moveToShare $(lift fs)|]
+moveToShare (ForceShare fs) = [||B.moveToShare $$(liftTyped fs)||]

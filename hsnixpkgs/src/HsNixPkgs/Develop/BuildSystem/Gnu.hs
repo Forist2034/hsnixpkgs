@@ -92,6 +92,7 @@ import HsNixPkgs.ExtendDrv
 import HsNixPkgs.HsBuilder.DepStr
 import HsNixPkgs.HsBuilder.Generate
 import HsNixPkgs.HsBuilder.OutputMod
+import HsNixPkgs.HsBuilder.Util
 import HsNixPkgs.SetupHook
 import HsNixPkgs.SetupHook.Executable
 import HsNixPkgs.StdEnv.MakeDeriv
@@ -171,24 +172,22 @@ configureExpr pbi cp@ConfigurePhase {configureCfg = cfg} = do
   msp <-
     if fixLibtool cfg
       then
-        (\v -> [|Just $(varE v)|])
+        (\v -> [||Just $$(unsafeCodeCoerce (varE v))||])
           <$> useModule libSearchMod
-      else pure [|Nothing|]
+      else pure [||Nothing||]
   pure
     ( runHook
         (configureHook cfg)
-        ( unsafeCodeCoerce
-            [|
-              B.configureFunc
-                $(lift (configureScript cfg))
-                $configFlags
-                $msp
-                $( case configPrefix cp of
-                     Just p -> [|Just $(unTypeCode p)|]
-                     Nothing -> [|Nothing|]
-                 )
-              |]
-        )
+        [||
+        B.configureFunc
+          $$(liftTyped (configureScript cfg))
+          $$configFlags
+          $$msp
+          $$( case configPrefix cp of
+                Just p -> [||Just $$p||]
+                Nothing -> [||Nothing||]
+            )
+        ||]
     )
   where
     libSearchMod =
@@ -217,41 +216,41 @@ configureExpr pbi cp@ConfigurePhase {configureCfg = cfg} = do
             (OccName "libSearchPath")
             (NameQ (ModName "Configure.LibSearchPath"))
         )
-    configFlags :: HsQ Exp
+    configFlags :: Code HsQ [String]
     configFlags =
-      listE
+      listET
         ( concat
             [ case configPrefix cp of
                 Just p ->
-                  [ [|
-                      $(lift (concat ["--", prefixKey cfg, "="]))
-                        ++ $(unTypeCode p)
-                      |]
+                  [ [||
+                    $$(liftTyped (concat ["--", prefixKey cfg, "="]))
+                      ++ $$p
+                    ||]
                   ]
                 Nothing -> [],
               fmap
-                (\(n, v) -> lift (concat ["--", n, "=", v]))
+                (\(n, v) -> liftTyped (concat ["--", n, "=", v]))
                 (configurePlatform cfg),
               case multiOutputArg pbi of
                 Just (_, moa) ->
-                  [ [|"--bindir=" ++ $(unTypeCode (outBin moa)) ++ "/bin"|],
-                    [|"--sbindir=" ++ $(unTypeCode (outBin moa)) ++ "/sbin"|],
-                    [|"--includedir=" ++ $(unTypeCode (outInclude moa)) ++ "/include"|],
-                    [|"--oldincludedir=" ++ $(unTypeCode (outInclude moa)) ++ "/include"|],
-                    [|"--mandir=" ++ $(unTypeCode (outMan moa)) ++ "/share/man"|],
-                    [|"--infodir=" ++ $(unTypeCode (outInfo moa)) ++ "/share/info"|],
-                    [|
-                      "--docdir="
-                        ++ $(unTypeCode (outDoc moa))
-                        ++ "/share/doc/"
-                        ++ $(lift (shareDocName moa))
-                      |],
-                    [|"--libdir=" ++ $(unTypeCode (outLib moa)) ++ "/lib"|],
-                    [|"--libexecdir=" ++ $(unTypeCode (outLib moa)) ++ "/libexec"|],
-                    [|"--localedir=" ++ $(unTypeCode (outLib moa)) ++ "/share/locale"|]
+                  [ [||"--bindir=" ++ $$(outBin moa) ++ "/bin"||],
+                    [||"--sbindir=" ++ $$(outBin moa) ++ "/sbin"||],
+                    [||"--includedir=" ++ $$(outInclude moa) ++ "/include"||],
+                    [||"--oldincludedir=" ++ $$(outInclude moa) ++ "/include"||],
+                    [||"--mandir=" ++ $$(outMan moa) ++ "/share/man"||],
+                    [||"--infodir=" ++ $$(outInfo moa) ++ "/share/info"||],
+                    [||
+                    "--docdir="
+                      ++ $$(outDoc moa)
+                      ++ "/share/doc/"
+                      ++ $$(liftTyped (T.unpack (shareDocName moa)))
+                    ||],
+                    [||"--libdir=" ++ $$(outLib moa) ++ "/lib"||],
+                    [||"--libexecdir=" ++ $$(outLib moa) ++ "/libexec"||],
+                    [||"--localedir=" ++ $$(outLib moa) ++ "/share/locale"||]
                   ]
                 Nothing -> [],
-              fmap unTypeCode (configureFlags cfg)
+              configureFlags cfg
             ]
         )
 
@@ -290,19 +289,17 @@ buildExpr :: MakeCfg -> BuildCfg -> Code HsQ (BIO ())
 buildExpr mc cfg =
   runHook
     (buildHook cfg)
-    ( unsafeCodeCoerce
-        [|
-          B.runMake
-            "build"
-            $(listE (fmap unTypeCode (buildFlags cfg)))
-            $( lift
-                 B.MakeCfg
-                   { B.mcMakeFile = makeFile mc,
-                     B.mcEnableParallel = buildInParallel cfg
-                   }
-             )
-          |]
-    )
+    [||
+    B.runMake
+      "build"
+      $$(listET (buildFlags cfg))
+      $$( liftTyped
+            B.MakeCfg
+              { B.mcMakeFile = makeFile mc,
+                B.mcEnableParallel = buildInParallel cfg
+              }
+        )
+    ||]
 
 buildPhase :: MakeCfg -> BuildCfg -> PhaseM m
 buildPhase mc cfg = mkBuildPhase (buildExpr mc cfg) (pure [])
@@ -335,23 +332,21 @@ checkExpr :: MakeCfg -> CheckPhase -> Code HsQ (BIO ())
 checkExpr mc cp@CheckPhase {checkCfg = cfg} =
   runHook
     (checkHook cfg)
-    ( unsafeCodeCoerce
-        [|
-          B.runMake
-            "check"
-            $( listE
-                 ( fmap unTypeCode (checkFlags cfg)
-                     ++ fmap lift (checkTarget cp)
-                 )
-             )
-            $( lift
-                 B.MakeCfg
-                   { B.mcMakeFile = makeFile mc,
-                     B.mcEnableParallel = checkInParallel cfg
-                   }
-             )
-          |]
-    )
+    [||
+    B.runMake
+      "check"
+      $$( listET
+            ( checkFlags cfg
+                ++ fmap liftTyped (checkTarget cp)
+            )
+        )
+      $$( liftTyped
+            B.MakeCfg
+              { B.mcMakeFile = makeFile mc,
+                B.mcEnableParallel = checkInParallel cfg
+              }
+        )
+    ||]
 
 checkPhase :: MakeCfg -> CheckPhase -> PhaseM m
 checkPhase mc cp = mkCheckPhase (checkExpr mc cp) (pure [])
@@ -383,33 +378,31 @@ installExpr :: PhaseBuildInfo m -> MakeCfg -> InstallPhase -> Code HsQ (BIO ())
 installExpr pbi mc ip@InstallPhase {installCfg = cfg} =
   runHook
     (installHook cfg)
-    ( unsafeCodeCoerce
-        [|
-          B.installFunc
-            $(listE (unTypeCode <$> installDest ip))
-            $( listE
-                 ( concat
-                     [ case multiOutputArg pbi of
-                         Just (_, moa) ->
-                           let dev = unTypeCode (outDev moa)
-                            in [ [|"pkgconfigdir=" ++ $dev ++ "/lib/pkgconfig"|],
-                                 [|"m4datadir=" ++ $dev ++ "/share/aclocal"|],
-                                 [|"aclocaldir=" ++ $dev ++ "/share/aclocal"|]
-                               ]
-                         Nothing -> [],
-                       fmap unTypeCode (installFlags cfg),
-                       fmap lift (installTarget ip)
-                     ]
-                 )
-             )
-            $( lift
-                 B.MakeCfg
-                   { B.mcMakeFile = makeFile mc,
-                     B.mcEnableParallel = False
-                   }
-             )
-          |]
-    )
+    [||
+    B.installFunc
+      $$(listET (installDest ip))
+      $$( listET
+            ( concat
+                [ case multiOutputArg pbi of
+                    Just (_, moa) ->
+                      let dev = outDev moa
+                       in [ [||"pkgconfigdir=" ++ $$dev ++ "/lib/pkgconfig"||],
+                            [||"m4datadir=" ++ $$dev ++ "/share/aclocal"||],
+                            [||"aclocaldir=" ++ $$dev ++ "/share/aclocal"||]
+                          ]
+                    Nothing -> [],
+                  installFlags cfg,
+                  fmap liftTyped (installTarget ip)
+                ]
+            )
+        )
+      $$( liftTyped
+            B.MakeCfg
+              { B.mcMakeFile = makeFile mc,
+                B.mcEnableParallel = False
+              }
+        )
+    ||]
 
 installPhase ::
   PhaseBuildInfo m ->
@@ -560,23 +553,21 @@ installCheckExpr :: MakeCfg -> InstallCheckPhase -> Code HsQ (BIO ())
 installCheckExpr mc icp@InstallCheckPhase {installCheckCfg = cfg} =
   runHook
     (installCheckHook cfg)
-    ( unsafeCodeCoerce
-        [|
-          B.runMake
-            "install check"
-            $( listE
-                 ( fmap unTypeCode (installCheckFlags cfg)
-                     ++ fmap lift (installCheckTargets icp)
-                 )
-             )
-            $( lift
-                 B.MakeCfg
-                   { B.mcMakeFile = makeFile mc,
-                     B.mcEnableParallel = installCheckInParallel cfg
-                   }
-             )
-          |]
-    )
+    [||
+    B.runMake
+      "install check"
+      $$( listET
+            ( installCheckFlags cfg
+                ++ fmap liftTyped (installCheckTargets icp)
+            )
+        )
+      $$( liftTyped
+            B.MakeCfg
+              { B.mcMakeFile = makeFile mc,
+                B.mcEnableParallel = installCheckInParallel cfg
+              }
+        )
+    ||]
 
 installCheckPhase :: MakeCfg -> InstallCheckPhase -> PhaseM m
 installCheckPhase mc ip = mkInstallCheckPhase (installCheckExpr mc ip) (pure [])
@@ -608,26 +599,24 @@ distExpr :: MakeCfg -> DistPhase -> Code HsQ (BIO ())
 distExpr mc dp@DistPhase {distCfg = cfg} =
   runHook
     (distHook cfg)
-    ( unsafeCodeCoerce
-        [|
-          B.distFunc
-            $( listE
-                 ( fmap unTypeCode (distFlags cfg)
-                     ++ fmap lift (distTargets dp)
-                 )
-             )
-            $( lift
-                 B.MakeCfg
-                   { B.mcMakeFile = makeFile mc,
-                     B.mcEnableParallel = False
-                   }
-             )
-            $( case distTarballs dp of
-                 Just (d, t) -> [|Just ($(unTypeCode d), $(lift t))|]
-                 Nothing -> [|Nothing|]
-             )
-          |]
-    )
+    [||
+    B.distFunc
+      $$( listET
+            ( distFlags cfg
+                ++ fmap liftTyped (distTargets dp)
+            )
+        )
+      $$( liftTyped
+            B.MakeCfg
+              { B.mcMakeFile = makeFile mc,
+                B.mcEnableParallel = False
+              }
+        )
+      $$( case distTarballs dp of
+            Just (d, t) -> [||Just ($$d, $$(liftTyped t))||]
+            Nothing -> [||Nothing||]
+        )
+    ||]
 
 distPhase :: MakeCfg -> DistPhase -> PhaseM m
 distPhase mc dp = mkDistPhase (distExpr mc dp) (pure [])

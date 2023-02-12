@@ -8,4 +8,4 @@ import HsNixPkgs.HsBuilder.Generate
 import Language.Haskell.TH
 
 patchSheBang :: Code HsQ [FilePath] -> Code HsQ (FilePath -> BIO ())
-patchSheBang path = unsafeCodeCoerce [|B.patchSheBang $(unTypeCode path)|]
+patchSheBang path = [||B.patchSheBang $$path||]

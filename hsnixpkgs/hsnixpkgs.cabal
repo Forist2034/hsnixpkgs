@@ -44,6 +44,7 @@ library
       HsNixPkgs.HsBuilder.DepStr
       HsNixPkgs.HsBuilder.Generate
       HsNixPkgs.HsBuilder.OutputMod
+      HsNixPkgs.HsBuilder.Util
       HsNixPkgs.SetupHook
       HsNixPkgs.SetupHook.Executable
       HsNixPkgs.StdEnv.BootTools.Derivation
