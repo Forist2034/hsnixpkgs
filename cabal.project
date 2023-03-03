@@ -1,0 +1,1 @@
+packages: builderlib/boot stdenv/unpack stdenv/pack compile-builder hsnixpkgs
