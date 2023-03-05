@@ -2,13 +2,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module HsNixPkgs.BootTools.Derivation
-  ( Hash (..),
-    DerivArchive (..),
-    BootDeriv (..),
-    packDerivations,
-  )
-where
+module HsNixPkgs.BootTools.Derivation (
+  Hash (..),
+  DerivArchive (..),
+  BootDeriv (..),
+  packDerivations,
+) where
 
 import Codec.Compression.Lzma
 import Control.Monad.IO.Class
@@ -18,18 +17,19 @@ import qualified Data.Aeson as JSON
 import Data.Aeson.TH (Options (fieldLabelModifier), deriveJSON)
 import Data.Binary
 import qualified Data.ByteString.Lazy as LBS
+import Data.Foldable
 import Data.Functor
 import qualified Data.HashMap.Strict as HM
 import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
 import qualified Data.Text.IO as TIO
 import HsNixPkgs.BootTools.ReferenceGraph
 import HsNixPkgs.BootTools.StorePath
 import HsNixPkgs.BootTools.Type
 import Nix.Nar
 import System.FilePath
+import System.OsPath.Posix (encodeUtf)
 
 data DerivArchive = DerivArchive
   { daName :: Text,
@@ -56,11 +56,41 @@ deriveJSON
 
 type PackM = StateT (HM.HashMap Text (Digest SHA256)) IO
 
-archiveDerivation :: FilePath -> Text -> StorePath -> PackM (DerivArchive, Text)
-archiveDerivation dest p sp = do
-  liftIO (TIO.putStrLn ("Packing nar of " <> p))
-  nar <- encode <$> liftIO (readNar (TE.encodeUtf8 p))
-  liftIO (TIO.putStrLn "Compressing nar")
+data LogInfo = LogInfo
+  { liNameWidth :: Int,
+    liNum :: Text
+  }
+
+type LogItem = (Text, Int)
+
+writeLog :: MonadIO m => LogInfo -> LogItem -> Text -> m ()
+writeLog li (n, i) msg =
+  liftIO
+    ( TIO.putStrLn
+        ( mconcat
+            [ "[",
+              T.justifyLeft (T.length (liNum li)) ' ' (T.pack (show i)),
+              " of ",
+              liNum li,
+              "] ",
+              T.justifyLeft (liNameWidth li) ' ' n,
+              "> ",
+              msg
+            ]
+        )
+    )
+
+archiveDerivation ::
+  LogInfo ->
+  LogItem ->
+  FilePath ->
+  Text ->
+  StorePath ->
+  PackM (DerivArchive, Text)
+archiveDerivation li lt dest p sp = do
+  writeLog li lt ("Packing nar of " <> p)
+  nar <- encode <$> liftIO (readNar (fromJust (encodeUtf (T.unpack p))))
+  writeLog li lt "Compressing nar"
   let compressed =
         compressWith
           ( defaultCompressParams
@@ -72,7 +102,8 @@ archiveDerivation dest p sp = do
       hsh = hashlazy compressed
   hash_suf <- getName 5 (T.pack (show hsh)) hsh
   let filename = storePathName sp <> "-" <> hash_suf <> ".nar.xz"
-  liftIO (TIO.putStrLn "Writing compressed nar to output")
+      path = dest </> T.unpack filename
+  writeLog li lt ("Writing compressed nar to " <> T.pack path)
   liftIO (LBS.writeFile (dest </> T.unpack filename) compressed)
   pure
     ( DerivArchive
@@ -93,12 +124,26 @@ archiveDerivation dest p sp = do
                 $> short
 
 packDerivations :: Text -> FilePath -> [GraphNode] -> IO [BootDeriv]
-packDerivations store dest gns =
+packDerivations store dest gns = do
+  TIO.putStrLn "These derivations with be packed:"
+  traverse_ (\gn -> TIO.putStrLn ("    " <> storePath gn)) gns
   evalStateT
-    ( traverse
-        ( \gn ->
-            let sp = parseStorePath store (storePath gn)
-             in ( \(da, suf) ->
+    ( let withSP =
+            zipWith
+              ( \idx gn ->
+                  let sp = parseStorePath store (storePath gn)
+                   in ((storePathName sp, idx), (gn, sp))
+              )
+              [1, 2 ..]
+              gns
+          logInfo =
+            LogInfo
+              { liNameWidth = maximum (fmap (\((n, _), _) -> T.length n) withSP),
+                liNum = T.pack (show (length gns))
+              }
+       in traverse
+            ( \(lt, (gn, sp)) ->
+                ( \(da, suf) ->
                     BootDeriv
                       { bdName =
                           fromMaybe
@@ -111,8 +156,13 @@ packDerivations store dest gns =
                         bdDependent = dependencies gn
                       }
                 )
-                  <$> archiveDerivation dest (storePath gn) sp
-        )
-        gns
+                  <$> archiveDerivation
+                    logInfo
+                    lt
+                    dest
+                    (storePath gn)
+                    sp
+            )
+            withSP
     )
     HM.empty

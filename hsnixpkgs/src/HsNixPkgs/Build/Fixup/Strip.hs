@@ -7,8 +7,8 @@ import Data.Singletons
 import qualified Data.Text as T
 import qualified HsNixPkgs.Boot.Build.Fixup.Strip as B
 import HsNixPkgs.Build.Main (BIO)
-import HsNixPkgs.HsBuilder.Generate
 import HsNixPkgs.System
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
@@ -30,12 +30,12 @@ stripDirs sa =
     [|
       B.stripDirs
         $( lift
-             ( let prefix = toConfigTriple (fromSing (sing @s)) <> "-"
-                in B.StripCfg
-                     { B.stripCmd = T.unpack (prefix <> "strip"),
-                       B.ranlibCmd = T.unpack (prefix <> "ranlib")
-                     }
-             )
+            ( let prefix = toConfigTriple (fromSing (sing @s)) <> "-"
+               in B.StripCfg
+                    { B.stripCmd = T.unpack (prefix <> "strip"),
+                      B.ranlibCmd = T.unpack (prefix <> "ranlib")
+                    }
+            )
          )
         $(listE (fmap unTypeCode (stripFlags sa)))
         $(lift (stripSubDirs sa))

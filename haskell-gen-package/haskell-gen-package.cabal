@@ -1,0 +1,51 @@
+cabal-version: 3.4
+name:          haskell-gen-package
+version:       0.1.0.0
+license:       MIT
+license-file:  LICENSE
+maintainer:    dariankline@outlook.com
+author:        Jose Jane
+build-type:    Simple
+
+library
+    exposed-modules:
+        Language.Haskell.GenPackage
+        Language.Haskell.GenPackage.StringMod
+        Language.Haskell.GenPackage.SynMod
+
+    signatures:         Language.Haskell.GenPackage.Str
+    hs-source-dirs:     src
+    other-modules:      Language.Haskell.GenPackage.Types
+    default-language:   Haskell2010
+    default-extensions: KindSignatures DataKinds
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base ^>=4.17,
+        unordered-containers ^>=0.2,
+        mtl ^>=2.2,
+        template-haskell ^>=2.19,
+        haskell-gen-package:proc-name
+
+library proc-name
+    exposed-modules:
+        Language.Haskell.GenPackage.BuildMod
+        Language.Haskell.GenPackage.BuildMod.TH
+        Language.Haskell.GenPackage.BuildMod.Types
+
+    hs-source-dirs:   proc-name
+    default-language: Haskell2010
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base ^>=4.17,
+        unordered-containers ^>=0.2,
+        mtl ^>=2.2,
+        template-haskell ^>=2.19,
+        containers ^>=0.6

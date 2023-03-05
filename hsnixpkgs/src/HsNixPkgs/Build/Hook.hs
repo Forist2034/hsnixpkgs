@@ -6,7 +6,7 @@ import Data.Default
 import Data.Maybe
 import qualified HsNixPkgs.Boot.Build.Hook as B
 import HsNixPkgs.Build.Main (BIO)
-import HsNixPkgs.HsBuilder.Generate
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 
 data Hook t = Hook

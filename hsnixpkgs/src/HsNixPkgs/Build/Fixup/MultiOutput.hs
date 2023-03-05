@@ -5,7 +5,7 @@ module HsNixPkgs.Build.Fixup.MultiOutput (multiOutputFixup) where
 import qualified HsNixPkgs.Boot.Build.Fixup.MultipleOutput as B
 import HsNixPkgs.Build.Main (BIO)
 import HsNixPkgs.Build.MultiOutput
-import HsNixPkgs.HsBuilder.Generate
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 
 multiOutputFixup ::

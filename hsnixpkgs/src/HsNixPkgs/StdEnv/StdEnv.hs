@@ -20,11 +20,11 @@ singletons
       | RegularStage
     |]
 
-type StdEnvGhc = Ghc_9_0_2
+type StdEnvGhc = Ghc_9_4_3
 
-data StdEnv (s :: StageSpec) (b :: System) (h :: System) (t :: System) m = StdEnv
-  { stdEnvGhc :: DrvOutput b b m,
-    compileBuilderBin :: DrvOutput b b m,
-    builderLibBoot :: HsPackage StdEnvGhc b b b m,
-    stdEnvExec :: SimpleDeps [] Executable b h t m
+data StdEnv (s :: StageSpec) (b :: System) (h :: System) (t :: System) = StdEnv
+  { stdEnvGhc :: DrvOutput b b,
+    compileBuilderBin :: DrvOutput b b,
+    builderLibBoot :: HsPackage StdEnvGhc b b b,
+    stdEnvExec :: SimpleDeps [] Executable b h t
   }

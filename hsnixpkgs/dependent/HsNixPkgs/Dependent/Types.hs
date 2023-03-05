@@ -1,50 +1,48 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
 
-module HsNixPkgs.Dependent.Types
-  ( CA,
-    SimpleDeps (..),
-    HasPropagatedDep (..),
-  )
-where
+module HsNixPkgs.Dependent.Types (
+  CA,
+  SimpleDeps (..),
+  HasPropagatedDep (..),
+) where
 
 import Data.Kind
 import HsNixPkgs.System
 
 type CA ::
   (Type -> Constraint) ->
-  (System -> System -> System -> k -> Type) ->
-  k ->
+  (System -> System -> System -> Type) ->
   Constraint
-type CA c a m = forall b h t. c (a b h t m)
+type CA c a = forall b h t. c (a b h t)
 
-data SimpleDeps c a (b :: System) (h :: System) (t :: System) (m :: k) = SimpleDeps
-  { depsBuildBuild :: c (a b b b m),
+data SimpleDeps c a (b :: System) (h :: System) (t :: System) = SimpleDeps
+  { depsBuildBuild :: c (a b b b),
     -- | same as nixpkgs nativeBuildInputs
-    depsBuildHost :: c (a b b h m),
-    depsBuildTarget :: c (a b b t m),
-    depsHostHost :: c (a b h h m),
+    depsBuildHost :: c (a b b h),
+    depsBuildTarget :: c (a b b t),
+    depsHostHost :: c (a b h h),
     -- | same as nixpkgs buildInputs
-    depsHostTarget :: c (a b h t m),
-    depsTargetTarget :: c (a b t t m)
+    depsHostTarget :: c (a b h t),
+    depsTargetTarget :: c (a b t t)
   }
 
 deriving instance
-  (CA Eq a m, (forall e. (Eq e) => Eq (c e))) =>
-  Eq (SimpleDeps c a b h t m)
+  (CA Eq a, (forall e. (Eq e) => Eq (c e))) =>
+  Eq (SimpleDeps c a b h t)
 
 deriving instance
-  (CA Show a m, (forall e. (Show e) => Show (c e))) =>
-  Show (SimpleDeps c a b h t m)
+  (CA Show a, (forall e. (Show e) => Show (c e))) =>
+  Show (SimpleDeps c a b h t)
 
 instance
-  (forall b1 h1 t1. Semigroup (c (a b1 h1 t1 m))) =>
-  Semigroup (SimpleDeps c a b h t m)
+  (forall b1 h1 t1. Semigroup (c (a b1 h1 t1))) =>
+  Semigroup (SimpleDeps c a b h t)
   where
   l <> r =
     SimpleDeps
@@ -57,8 +55,8 @@ instance
       }
 
 instance
-  (forall b1 h1 t1. Monoid (c (a b1 h1 t1 m))) =>
-  Monoid (SimpleDeps c a b h t m)
+  (forall b1 h1 t1. Monoid (c (a b1 h1 t1))) =>
+  Monoid (SimpleDeps c a b h t)
   where
   mempty =
     SimpleDeps
@@ -71,4 +69,4 @@ instance
       }
 
 class (Foldable c) => HasPropagatedDep a c | a -> c where
-  propagatedDep :: a b h t m -> SimpleDeps c a b h t m
+  propagatedDep :: a b h t -> SimpleDeps c a b h t

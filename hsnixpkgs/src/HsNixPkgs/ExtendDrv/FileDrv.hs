@@ -13,20 +13,16 @@ import HsNix.Derivation
 
 singletons
   [d|
-    data FileDrvType
-      = RegularFDrv
-      | DirectoryFDrv
+    data FileSrcType
+      = RegularFSrc
+      | DirectoryFSrc
     |]
 
-data FileDeriv m (t :: FileDrvType) = FileDrv
-  { fDrvName :: Text,
-    fDrvBase :: Derivation m,
-    fDrvFilename :: Text
+data FileSource (t :: FileSrcType) = FileSrc
+  { fSrcName :: Text,
+    fSrcBase :: SrcInput
   }
+  deriving (Show, Eq)
 
-deriving instance (ApplicativeDeriv m) => Show (FileDeriv m t)
-
-deriving instance (ApplicativeDeriv m) => Eq (FileDeriv m t)
-
-instance (ApplicativeDeriv m) => Hashable (FileDeriv m t) where
-  hashWithSalt s v = hashWithSalt s (fDrvBase v)
+instance Hashable (FileSource t) where
+  hashWithSalt s v = hashWithSalt s (fSrcBase v)

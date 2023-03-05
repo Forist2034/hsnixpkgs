@@ -2,15 +2,14 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
-module HsNixPkgs.Build.Unpack
-  ( UnpackP,
-    UnpackCfg (..),
-    SourceList,
-    unpackExpr,
-    mkUnpackPhase,
-    unpackPhase,
-  )
-where
+module HsNixPkgs.Build.Unpack (
+  UnpackP,
+  UnpackCfg (..),
+  SourceList,
+  unpackExpr,
+  mkUnpackPhase,
+  unpackPhase,
+) where
 
 import Data.Default
 import qualified Data.List.NonEmpty as NEL
@@ -26,8 +25,9 @@ import HsNixPkgs.Build.Main (BIO)
 import HsNixPkgs.Build.Phase
 import HsNixPkgs.ExtendDrv
 import HsNixPkgs.HsBuilder.DepStr
-import HsNixPkgs.HsBuilder.Generate
+import HsNixPkgs.HsBuilder.KVMod
 import HsNixPkgs.HsBuilder.Util
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import System.Directory
@@ -62,15 +62,14 @@ instance Default UnpackCfg where
         unpackHook = def
       }
 
-type SourceList m = NEL.NonEmpty (Sigma FileDrvType (TyCon1 (FileDeriv m)))
+type SourceList = NEL.NonEmpty (Sigma FileSrcType (TyCon1 FileSource))
 
 unpackExpr ::
-  forall mt m.
-  ApplicativeDeriv m =>
-  SourceList m ->
+  forall mt.
+  SourceList ->
   String ->
   UnpackCfg ->
-  DepModM mt m (Code HsQ (BIO ()))
+  ModuleM mt (Code HsQ (BIO ()))
 unpackExpr sources sourceRoot cfg = do
   s <-
     useModule
@@ -80,10 +79,11 @@ unpackExpr sources sourceRoot cfg = do
           []
           ( fmap
               ( \(_ :&: f) ->
-                  ( T.unpack (fDrvName f),
-                    "FilePath",
-                    DepStr (ND.storePathStr (fDrvBase f))
-                  )
+                  KVPair
+                    { kvKey = T.unpack (fSrcName f),
+                      kvType = "FilePath",
+                      kvValue = DepStr (ND.srcStorePathStr (fSrcBase f))
+                    }
               )
               sources
           )
@@ -98,7 +98,7 @@ unpackExpr sources sourceRoot cfg = do
                     ( NEL.zipWith
                         ( \u@(_ :&: f) e ->
                             [||
-                            ( $$(liftTyped (T.unpack (fDrvName f))),
+                            ( $$(liftTyped (T.unpack (fSrcName f))),
                               $$(selectUnpack u (unsafeCodeCoerce (varE e)))
                             )
                             ||]
@@ -114,27 +114,26 @@ unpackExpr sources sourceRoot cfg = do
     )
   where
     selectUnpack ::
-      Sigma FileDrvType (TyCon1 (FileDeriv m)) ->
+      Sigma FileSrcType (TyCon1 FileSource) ->
       Code HsQ FilePath ->
       Code HsQ (IO ())
-    selectUnpack (SDirectoryFDrv :&: _) e = [||copyFile $$e "."||]
-    selectUnpack (SRegularFDrv :&: f) e =
+    selectUnpack (SDirectoryFSrc :&: _) e = [||copyFile $$e "."||]
+    selectUnpack (SRegularFSrc :&: f) e =
       head
         ( mapMaybe
-            (\uf -> uf (fDrvFilename f))
+            (\uf -> uf (fSrcName f))
             (unpackCmds cfg)
         )
         e
 
-mkUnpackPhase :: Code HsQ (BIO ()) -> HsQ [Dec] -> ModuleM s mt (Code HsQ Phase)
+mkUnpackPhase :: Code HsQ (BIO ()) -> HsQ [Dec] -> ModuleM mt (Code HsQ Phase)
 mkUnpackPhase = newPhase "unpackPhrase" "unpacking sources"
 
 unpackPhase ::
-  ApplicativeDeriv m =>
-  SourceList m ->
+  SourceList ->
   String ->
   UnpackCfg ->
-  DepModM mt m (Code HsQ Phase)
+  ModuleM mt (Code HsQ Phase)
 unpackPhase s sr cfg = do
   fun <- unpackExpr s sr cfg
   mkUnpackPhase fun (pure [])

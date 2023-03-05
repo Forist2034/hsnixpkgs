@@ -1,4 +1,4 @@
-module HsNixPkgs.HsBuilder.Internal.BuildMod.Types (RnM, WalkName (..)) where
+module Language.Haskell.GenPackage.BuildMod.Types (RnM, WalkName (..)) where
 
 import Control.Monad.State.Strict
 import Data.Char

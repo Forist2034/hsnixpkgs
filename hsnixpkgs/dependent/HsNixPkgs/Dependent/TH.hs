@@ -1,6 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
 module HsNixPkgs.Dependent.TH (genProgFunc) where
@@ -65,14 +63,14 @@ allDepType =
     (Target, Target)
   ]
 
-type ProgM a b h t m = State (SimpleDeps HS.HashSet a b h t m, SimpleDeps [] a b h t m)
+type ProgM a b h t = State (SimpleDeps HS.HashSet a b h t, SimpleDeps [] a b h t)
 
 guardVertex ::
-  (Eq elem, Hashable elem) =>
+  Hashable elem =>
   elem ->
-  (SimpleDeps HS.HashSet a b h t m -> HS.HashSet elem) ->
-  ProgM a b h t m () ->
-  ProgM a b h t m ()
+  (SimpleDeps HS.HashSet a b h t -> HS.HashSet elem) ->
+  ProgM a b h t () ->
+  ProgM a b h t ()
 guardVertex v sel f =
   gets (HS.member v . sel . fst) >>= \e -> unless e f
 
@@ -175,7 +173,6 @@ genProgFunc = do
             t <- do
               c <- newName "c"
               a <- newName "a"
-              m <- newName "m"
               t <- newName "t"
               let vf o =
                     case o of
@@ -183,19 +180,18 @@ genProgFunc = do
                       Host -> varT h
                       Target -> varT t
               ForallT
-                (fmap (`PlainTV` SpecifiedSpec) [a, b, h, t, m, c])
+                (fmap (`PlainTV` SpecifiedSpec) [a, b, h, t, c])
                 <$> sequence
                   [ [t|HasPropagatedDep $(varT a) $(varT c)|],
                     [t|SingI $(varT b)|],
                     [t|SingI $(varT h)|],
-                    [t|CA Eq $(varT a) $(varT m)|],
-                    [t|CA Hashable $(varT a) $(varT m)|]
+                    [t|CA Hashable $(varT a)|]
                   ]
                 <*> [t|
-                  $(varT a) $(varT b) $(vf (fst dt)) $(vf (snd dt)) $(varT m) ->
+                  $(varT a) $(varT b) $(vf (fst dt)) $(vf (snd dt)) ->
                   State
-                    ( SimpleDeps HS.HashSet $(varT a) $(varT b) $(varT h) $(varT t) $(varT m),
-                      SimpleDeps [] $(varT a) $(varT b) $(varT h) $(varT t) $(varT m)
+                    ( SimpleDeps HS.HashSet $(varT a) $(varT b) $(varT h) $(varT t),
+                      SimpleDeps [] $(varT a) $(varT b) $(varT h) $(varT t)
                     )
                     ()
                   |]
@@ -209,10 +205,10 @@ genProgFunc = do
     vs <- newName "vs"
     t <-
       [t|
-        forall a b h t m c.
-        (SingI b, SingI h, HasPropagatedDep a c, CA Eq a m, CA Hashable a m) =>
-        [SimpleDeps c a b h t m] ->
-        SimpleDeps [] a b h t m
+        forall a b h t c.
+        (SingI b, SingI h, HasPropagatedDep a c, CA Hashable a) =>
+        [SimpleDeps c a b h t] ->
+        SimpleDeps [] a b h t
         |]
     e <-
       [|

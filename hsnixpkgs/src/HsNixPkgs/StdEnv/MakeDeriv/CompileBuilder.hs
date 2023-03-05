@@ -1,10 +1,9 @@
 {-# LANGUAGE TupleSections #-}
 
-module HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
-  ( BuilderCfg (..),
-    compileBuilder,
-  )
-where
+module HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder (
+  BuilderCfg (..),
+  compileBuilder,
+) where
 
 import Control.Monad
 import Data.Bifunctor
@@ -18,7 +17,12 @@ import Data.String
 import Data.Text (Text)
 import qualified Data.Text as T
 import HsNix.Derivation
+import HsNix.DrvStr (DrvStr)
+import qualified HsNix.DrvStr as DS
+import qualified HsNix.DrvStr.Builder as DSB
 import HsNix.Hash
+import HsNix.OutputName
+import HsNix.StorePathName
 import HsNixPkgs.Build.Main
 import HsNixPkgs.Dependent
 import HsNixPkgs.Develop.C.Library
@@ -26,19 +30,19 @@ import HsNixPkgs.Develop.Haskell.Package
 import HsNixPkgs.Develop.NativeLibrary
 import qualified HsNixPkgs.ExtendDrv as ED
 import HsNixPkgs.HsBuilder.DepStr
-import HsNixPkgs.HsBuilder.Generate
 import HsNixPkgs.SetupHook
 import HsNixPkgs.StdEnv.StdEnv
 import HsNixPkgs.System
 import HsNixPkgs.Util
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 
-data BuilderCfg b m = BuilderCfg
-  { builderDep :: [HsPackage StdEnvGhc b b b m],
-    builderFlags :: [DrvStr m]
+data BuilderCfg b = BuilderCfg
+  { builderDep :: [HsPackage StdEnvGhc b b b],
+    builderFlags :: [DrvStr]
   }
 
-instance ApplicativeDeriv m => Default (BuilderCfg b m) where
+instance Default (BuilderCfg b) where
   def =
     BuilderCfg
       { builderDep = [],
@@ -85,10 +89,10 @@ coreLibrary =
     ]
 
 procDep ::
-  (SingI b, SingI h, ApplicativeDeriv m) =>
-  [HsPackage hsc b h t m] ->
-  ( SimpleDeps [] (HsPackage hsc) b h t m,
-    SimpleDeps [] CLibrary b h t m
+  (SingI b, SingI h) =>
+  [HsPackage hsc b h t] ->
+  ( SimpleDeps [] (HsPackage hsc) b h t,
+    SimpleDeps [] CLibrary b h t
   )
 procDep d =
   let pd = propagateDependencies [mempty {depsHostTarget = HsPackageDep <$> d}]
@@ -123,7 +127,7 @@ procDep d =
             HsPackageDep p -> (p : hs, c)
             HsFFIDep f -> (hs, f : c)
 
-checkDep :: HS.HashSet Text -> SimpleDeps [] (HsPackage StdEnvGhc) b b b m -> HS.HashSet Text
+checkDep :: HS.HashSet Text -> SimpleDeps [] (HsPackage StdEnvGhc) b b b -> HS.HashSet Text
 checkDep spec prov =
   spec
     `HS.difference` HS.union
@@ -141,20 +145,17 @@ checkDep spec prov =
       )
 
 compileBuilder ::
-  forall b h t s m.
-  (ApplicativeDeriv m, SingI b) =>
+  forall b h t s.
+  SingI b =>
   Text ->
-  StdEnv s b h t m ->
-  BuilderCfg b m ->
+  StdEnv s b h t ->
+  BuilderCfg b ->
   [Extension] ->
-  DepModM 'MainModule m (Code HsQ (BIO ())) ->
-  Derivation m
+  ModuleM 'MainModule (Code HsQ (BIO ())) ->
+  Derivation
 compileBuilder name env cfg ext main =
   let (extDep, mModEnvs) =
-        let hsE =
-              hsExecutable
-                ext
-                (main >>= mainFunc . runBuildMain)
+        let hsE = hsExecutable (mainModule ext (runBuildMain <$> main))
          in ( HS.map T.pack (execDependencies hsE),
               fmap
                 ( first
@@ -165,7 +166,7 @@ compileBuilder name env cfg ext main =
                             )
                     )
                 )
-                (("Main", execMainModule hsE) : HM.toList (execOtherModules hsE))
+                (HM.toList (execModules hsE))
             )
       (hsD, cD) = procDep (builderLibBoot env : builderDep cfg)
    in derivation
@@ -182,9 +183,9 @@ compileBuilder name env cfg ext main =
                     )
             sh <- nativeLib mempty [cLibrary cD []]
             pkgConfs <-
-              toDrvStr . unwordsDSB
+              DSB.toDrvStr . unwordsDSB
                 <$> traverse
-                  (fmap fromDrvStr . packageConfDir)
+                  (fmap DSB.fromDrvStr . packageConfDir)
                   ( concat
                       [ depsHostHost hsD,
                         depsHostTarget hsD,
@@ -196,17 +197,17 @@ compileBuilder name env cfg ext main =
             modEnvs <- traverse (\((_, e), DepStr v) -> (e,) <$> v) mModEnvs
             pure
               ( ( defaultDrvArg
-                    (name <> "-builder")
+                    (makeStorePathNameThrow (name <> "-builder"))
                     bb
                     (toNixSys (fromSing (sing @b)))
                 )
                   { drvEnv =
                       ("ghc", gh <> "/bin/ghc")
                         : ( "ghc_flags",
-                            toDrvStr
+                            DSB.toDrvStr
                               ( escapeArgs
                                   ( foldr'
-                                      (\p s -> "-package" : toDrvStr p : s)
+                                      (\p s -> "-package" : DS.fromText p : s)
                                       (builderFlags cfg)
                                       extDep
                                   )
@@ -216,7 +217,11 @@ compileBuilder name env cfg ext main =
                         : ("packages", pkgConfs)
                         : HM.toList (newEnv sh),
                     drvPassAsFile = modEnvs ++ HM.toList (newPassAsFile sh),
-                    drvType = ContentAddressed @SHA256 HashFlat (NEL.singleton "out")
+                    drvType =
+                      ContentAddressed
+                        @SHA256
+                        HashFlat
+                        (NEL.singleton (makeOutputNameThrow "out"))
                   }
               )
         )

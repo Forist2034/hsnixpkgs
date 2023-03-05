@@ -1,98 +1,185 @@
-cabal-version: 1.12
-
--- This file has been generated from package.yaml by hpack version 0.35.0.
---
--- see: https://github.com/sol/hpack
-
-name:           hsnixpkgs
-version:        0.1.0.0
-author:         Jose Lane
-maintainer:     dariankline@outlook.com
-license:        MIT
-license-file:   LICENSE
-build-type:     Simple
+cabal-version:      3.4
+name:               hsnixpkgs
+version:            0.1.0.0
+license:            MIT
+license-file:       LICENSE
+maintainer:         dariankline@outlook.com
+author:             Jose Jane
+build-type:         Simple
 extra-source-files:
-    stdenv/linux/amd64/glibc.yaml
-    stdenv/linux/amd64/support-tool.yaml
+    stdenv/spec/linux/amd64/glibc.yaml
+    stdenv/spec/linux/amd64/support-tool.yaml
+
+flag dev
+    description:
+        Is in dev environment (add backend to build-depends to make HLS working)
+
+    default:     False
 
 library
-  exposed-modules:
-      HsNixPkgs.Build.Fixup
-      HsNixPkgs.Build.Fixup.CompressManPages
-      HsNixPkgs.Build.Fixup.MakeSymlinkRelative
-      HsNixPkgs.Build.Fixup.Move
-      HsNixPkgs.Build.Fixup.MoveDocs
-      HsNixPkgs.Build.Fixup.MultiOutput
-      HsNixPkgs.Build.Fixup.PatchShebang
-      HsNixPkgs.Build.Fixup.PruneLibtoolFiles
-      HsNixPkgs.Build.Fixup.Strip
-      HsNixPkgs.Build.Hook
-      HsNixPkgs.Build.Main
-      HsNixPkgs.Build.MultiOutput
-      HsNixPkgs.Build.Patch
-      HsNixPkgs.Build.Phase
-      HsNixPkgs.Build.Unpack
-      HsNixPkgs.Dependent
-      HsNixPkgs.Dependent.TH
-      HsNixPkgs.Dependent.Types
-      HsNixPkgs.Develop.BuildSystem.Gnu
-      HsNixPkgs.Develop.C.Library
-      HsNixPkgs.Develop.Haskell.Package
-      HsNixPkgs.Develop.NativeLibrary
-      HsNixPkgs.ExtendDrv
-      HsNixPkgs.ExtendDrv.FileDrv
-      HsNixPkgs.HsBuilder.DepStr
-      HsNixPkgs.HsBuilder.Generate
-      HsNixPkgs.HsBuilder.OutputMod
-      HsNixPkgs.HsBuilder.Util
-      HsNixPkgs.SetupHook
-      HsNixPkgs.SetupHook.Executable
-      HsNixPkgs.StdEnv.BootTools.Derivation
-      HsNixPkgs.StdEnv.BootTools.RequireFile
-      HsNixPkgs.StdEnv.BootTools.TH
-      HsNixPkgs.StdEnv.Linux.GLibc.Amd64
-      HsNixPkgs.StdEnv.Linux.SupportTools.Amd64
-      HsNixPkgs.StdEnv.MakeDeriv
-      HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
-      HsNixPkgs.StdEnv.StdEnv
-      HsNixPkgs.System
-      HsNixPkgs.System.Abi
-      HsNixPkgs.System.Cpu
-      HsNixPkgs.System.Kernel
-      HsNixPkgs.System.System
-      HsNixPkgs.System.Vendor
-      HsNixPkgs.Util
-  other-modules:
-      HsNixPkgs.HsBuilder.Internal.BuildMod
-      HsNixPkgs.HsBuilder.Internal.BuildMod.TH
-      HsNixPkgs.HsBuilder.Internal.BuildMod.Types
-  hs-source-dirs:
-      src
-  default-extensions:
-      OverloadedStrings
-      ApplicativeDo
-      DataKinds
-      KindSignatures
-      ScopedTypeVariables
-      StandaloneDeriving
-      TypeApplications
-  ghc-options: -fenable-th-splice-warnings -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      base ==4.15.*
-    , bytestring ==0.10.*
-    , containers ==0.6.*
-    , data-default ==0.7.*
-    , directory ==1.3.*
-    , filepath ==1.4.*
-    , hashable ==1.3.*
-    , hsnix-core
-    , hsnixpkgs-boot-builderlib
-    , hsnixpkgs-stdenv-pack
-    , mtl ==2.2.*
-    , singletons ==3.0.*
-    , singletons-base ==3.0.*
-    , template-haskell ==2.17.*
-    , text ==1.2.*
-    , unordered-containers ==0.2.*
-    , yaml ==0.11.*
-  default-language: Haskell2010
+    exposed-modules:
+        HsNixPkgs.Build.Fixup
+        HsNixPkgs.Build.Fixup.CompressManPages
+        HsNixPkgs.Build.Fixup.MakeSymlinkRelative
+        HsNixPkgs.Build.Fixup.Move
+        HsNixPkgs.Build.Fixup.MoveDocs
+        HsNixPkgs.Build.Fixup.MultiOutput
+        HsNixPkgs.Build.Fixup.PatchShebang
+        HsNixPkgs.Build.Fixup.PruneLibtoolFiles
+        HsNixPkgs.Build.Fixup.Strip
+        HsNixPkgs.Build.Hook
+        HsNixPkgs.Build.Main
+        HsNixPkgs.Build.MultiOutput
+        HsNixPkgs.Build.Patch
+        HsNixPkgs.Build.Phase
+        HsNixPkgs.Build.Unpack
+        HsNixPkgs.Develop.BuildSystem.Gnu
+        HsNixPkgs.Develop.C.Library
+        HsNixPkgs.Develop.Haskell.Package
+        HsNixPkgs.Develop.NativeLibrary
+        HsNixPkgs.ExtendDrv
+        HsNixPkgs.ExtendDrv.FileDrv
+        HsNixPkgs.HsBuilder.KVMod
+        HsNixPkgs.HsBuilder.OutputMod
+        HsNixPkgs.HsBuilder.Util
+        HsNixPkgs.SetupHook
+        HsNixPkgs.SetupHook.Executable
+        HsNixPkgs.StdEnv.BootTools.Derivation
+        HsNixPkgs.StdEnv.BootTools.RequireFile
+        HsNixPkgs.StdEnv.Linux.GLibc.Amd64
+        HsNixPkgs.StdEnv.Linux.SupportTools.Amd64
+        HsNixPkgs.StdEnv.MakeDeriv
+        HsNixPkgs.StdEnv.MakeDeriv.CompileBuilder
+        HsNixPkgs.StdEnv.StdEnv
+        HsNixPkgs.Util
+
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+    default-extensions:
+        OverloadedStrings ApplicativeDo DataKinds KindSignatures
+        ScopedTypeVariables TypeApplications
+
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -fenable-th-splice-warnings
+
+    build-depends:
+        base ^>=4.17,
+        text ^>=2.0,
+        bytestring ^>=0.11,
+        containers ^>=0.6,
+        unordered-containers ^>=0.2,
+        hashable ^>=1.4,
+        data-default ^>=0.7,
+        mtl ^>=2.2,
+        template-haskell ^>=2.19,
+        filepath ^>=1.4,
+        directory ^>=1.3,
+        hsnixpkgs-builderlib-boot,
+        hsnix-core,
+        haskell-gen-package,
+        hsnixpkgs:{dependent, depstr, stdenv-unpack-th, system},
+        singletons ^>=3.0,
+        singletons-base ^>=3.1
+
+    if flag(dev)
+        build-depends: hsnix-drv
+
+library system
+    exposed-modules:    HsNixPkgs.System
+    hs-source-dirs:     system
+    other-modules:
+        HsNixPkgs.System.Abi
+        HsNixPkgs.System.Cpu
+        HsNixPkgs.System.Kernel
+        HsNixPkgs.System.System
+        HsNixPkgs.System.Vendor
+
+    default-language:   Haskell2010
+    default-extensions:
+        OverloadedStrings DataKinds DefaultSignatures EmptyCase
+        ExistentialQuantification FlexibleContexts FlexibleInstances GADTs
+        InstanceSigs KindSignatures PolyKinds RankNTypes
+        ScopedTypeVariables StandaloneDeriving StandaloneKindSignatures
+        TemplateHaskell TypeApplications TypeFamilies TypeOperators
+        UndecidableInstances NoCUSKs NoNamedWildCards NoStarIsType
+
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -fenable-th-splice-warnings
+
+    build-depends:
+        base ^>=4.17,
+        text ^>=2.0,
+        template-haskell,
+        hsnix-core:core-types,
+        singletons ^>=3.0,
+        singletons-base ^>=3.1
+
+library dependent
+    exposed-modules:    HsNixPkgs.Dependent
+    hs-source-dirs:     dependent
+    other-modules:
+        HsNixPkgs.Dependent.TH
+        HsNixPkgs.Dependent.Types
+
+    default-language:   Haskell2010
+    default-extensions: QuantifiedConstraints
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -fenable-th-splice-warnings
+
+    build-depends:
+        base ^>=4.17,
+        hashable ^>=1.4,
+        unordered-containers ^>=0.2,
+        template-haskell ^>=2.19,
+        mtl ^>=2.2,
+        hsnixpkgs:system,
+        singletons ^>=3.0,
+        singletons-base ^>=3.1
+
+library depstr
+    exposed-modules:
+        HsNixPkgs.HsBuilder.DepStr
+        Language.Haskell.GenPackage.Str
+
+    hs-source-dirs:   depstr
+    default-language: Haskell2010
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -fenable-th-splice-warnings
+
+    build-depends:
+        base ^>=4.17,
+        hsnix-core
+
+library stdenv-unpack-th
+    exposed-modules:
+        HsNixPkgs.StdEnv.BootTools.TH
+        HsNixPkgs.StdEnv.BootTools.UnpackArg
+
+    hs-source-dirs:   stdenv/unpack-th
+    default-language: Haskell2010
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -fenable-th-splice-warnings
+
+    build-depends:
+        base ^>=4.17,
+        text ^>=2.0,
+        unordered-containers ^>=0.2,
+        yaml ^>=0.11,
+        template-haskell ^>=2.19,
+        hsnixpkgs-stdenv-pack,
+        hsnix-core:core-types

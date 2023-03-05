@@ -1,66 +1,61 @@
-cabal-version: 1.12
-
--- This file has been generated from package.yaml by hpack version 0.35.0.
---
--- see: https://github.com/sol/hpack
-
-name:           hsnixpkgs-stdenv-pack
-version:        0.1.0.0
-author:         Jose Lane
-maintainer:     dariankline@outlook.com
-license:        MIT
-license-file:   LICENSE
-build-type:     Simple
+cabal-version: 3.4
+name:          hsnixpkgs-stdenv-pack
+version:       0.1.0.0
+license:       MIT
+license-file:  LICENSE
+maintainer:    dariankline@outlook.com
+author:        Jose Jane
+build-type:    Simple
 
 library
-  exposed-modules:
-      HsNixPkgs.BootTools.Derivation
-      HsNixPkgs.BootTools.ReferenceGraph
-      HsNixPkgs.BootTools.StorePath
-      HsNixPkgs.BootTools.SupportTools
-      HsNixPkgs.BootTools.Type
-  other-modules:
-      Paths_hsnixpkgs_stdenv_pack
-  hs-source-dirs:
-      src
-  default-extensions:
-      OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      aeson ==2.0.*
-    , base ==4.15.*
-    , binary ==0.8.*
-    , bytestring ==0.10.*
-    , cryptonite ==0.29.*
-    , directory ==1.3.*
-    , filepath ==1.4.*
-    , hashable ==1.3.*
-    , lzma ==0.0.*
-    , mtl ==2.2.*
-    , nix-archive
-    , text ==1.2.*
-    , unordered-containers ==0.2.*
-  default-language: Haskell2010
+    exposed-modules:
+        HsNixPkgs.BootTools.Derivation
+        HsNixPkgs.BootTools.ReferenceGraph
+        HsNixPkgs.BootTools.StorePath
+        HsNixPkgs.BootTools.SupportTools
+        HsNixPkgs.BootTools.Type
+
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+    default-extensions: OverloadedStrings Strict
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base ^>=4.17,
+        text >=1.2 && <2.1,
+        bytestring >=0.10 && <0.12,
+        filepath ^>=1.4.100,
+        directory ^>=1.3.8,
+        mtl ^>=2.2,
+        hashable ^>=1.4.2,
+        unordered-containers ^>=0.2,
+        lzma,
+        binary ^>=0.8,
+        aeson ^>=2.1,
+        cryptonite >=0.29 && <0.31,
+        nix-archive
 
 executable pack-stdenv-linux
-  main-is: Main.hs
-  other-modules:
-      Paths_hsnixpkgs_stdenv_pack
-  hs-source-dirs:
-      app/linux
-  default-extensions:
-      OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      base ==4.15.*
-    , bytestring ==0.10.*
-    , directory ==1.3.*
-    , filepath ==1.4.*
-    , hsnixpkgs-stdenv-pack
-    , text ==1.2.*
-    , yaml ==0.11.*
-  default-language: Haskell2010
-  if os(linux)
-    buildable: True
-  else
-    buildable: False
+    main-is:            Main.hs
+    hs-source-dirs:     app/linux
+    default-language:   Haskell2010
+    default-extensions: OverloadedStrings Strict
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base ^>=4.17,
+        text >=1.2 && <2.1,
+        bytestring >=0.10 && <0.12,
+        filepath ^>=1.4.100,
+        directory ^>=1.3.8,
+        yaml ^>=0.11,
+        hsnixpkgs-stdenv-pack
+
+    if !os(linux)
+        buildable: False

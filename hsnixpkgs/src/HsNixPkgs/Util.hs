@@ -1,35 +1,36 @@
 {-# LANGUAGE LambdaCase #-}
 
-module HsNixPkgs.Util
-  ( unwordsDSB,
-    unlinesDSB,
-    escapeArgs,
-  )
-where
+module HsNixPkgs.Util (
+  unwordsDSB,
+  unlinesDSB,
+  escapeArgs,
+) where
 
 import Data.Char (isSpace)
 import Data.Foldable
 import Data.String
-import HsNix.Derivation
+import HsNix.DrvStr (DrvStr)
+import qualified HsNix.DrvStr as DS
+import qualified HsNix.DrvStr.Builder as DSB
 
-escapeArg :: ApplicativeDeriv m => DrvStr m -> DrvStrBuilder m
+escapeArg :: DrvStr -> DSB.Builder
 escapeArg ds =
   foldMap
     ( \case
-        QStr s -> fromDrvStr s
-        QEscape c -> fromString ['\\', c]
+        DS.QStr s -> DSB.fromDrvStr s
+        DS.QChar c -> fromString ['\\', c]
     )
-    (quote (\c -> isSpace c || c == '\'' || c == '\"' || c == '\\') ds)
+    (DS.quote (\c -> isSpace c || c == '\'' || c == '\"' || c == '\\') ds)
 
-unwordsDSB :: ApplicativeDeriv m => [DrvStrBuilder m] -> DrvStrBuilder m
+unwordsDSB :: [DSB.Builder] -> DSB.Builder
 unwordsDSB [] = mempty
 unwordsDSB [x] = x
 unwordsDSB (x : xs) = foldl' (\r i -> r <> " " <> i) x xs
 
-unlinesDSB :: ApplicativeDeriv m => [DrvStrBuilder m] -> DrvStrBuilder m
+unlinesDSB :: [DSB.Builder] -> DSB.Builder
 unlinesDSB [] = mempty
 unlinesDSB [x] = x
 unlinesDSB (x : xs) = foldl' (\r i -> r <> "\n" <> i) x xs
 
-escapeArgs :: ApplicativeDeriv m => [DrvStr m] -> DrvStrBuilder m
+escapeArgs :: [DrvStr] -> DSB.Builder
 escapeArgs = unwordsDSB . fmap escapeArg

@@ -1,1 +1,13 @@
-packages: builderlib/boot stdenv/unpack stdenv/pack compile-builder hsnixpkgs
+packages: compile-builder
+          stdenv/pack
+          stdenv/unpack
+          builderlib/boot
+          haskell-gen-package
+          hsnixpkgs
+allow-newer: relude:base, relude:ghc-prim
+
+source-repository-package
+  type:git
+  location:https://github.com/Forist2034/nix-core
+  tag:9fa7f689681bc0d896cdfd4d325d2569bc52f8bc
+  subdir:nix-archive hsnix-core hsnix-drv

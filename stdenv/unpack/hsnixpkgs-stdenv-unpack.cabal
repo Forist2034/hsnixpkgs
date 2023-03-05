@@ -1,57 +1,48 @@
-cabal-version: 1.12
-
--- This file has been generated from package.yaml by hpack version 0.35.0.
---
--- see: https://github.com/sol/hpack
-
-name:           hsnixpkgs-stdenv-unpack
-version:        0.1.0.0
-author:         Jose Lane
-maintainer:     dariankline@outlook.com
-license:        MIT
-license-file:   LICENSE
-build-type:     Simple
+cabal-version: 3.4
+name:          hsnixpkgs-stdenv-unpack
+version:       0.1.0.0
+license:       MIT
+license-file:  LICENSE
+maintainer:    dariankline@outlook.com
+author:        Jose Jane
+build-type:    Simple
 
 library
-  exposed-modules:
-      HsNixPkgs.BootTools.HashRewrite
-  other-modules:
-      Paths_hsnixpkgs_stdenv_unpack
-  hs-source-dirs:
-      src
-  default-extensions:
-      OverloadedStrings
-  ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  cc-options: -O3
-  include-dirs:
-      include
-  c-sources:
-      cbits/rewrite.c
-  build-depends:
-      base ==4.15.*
-    , bytestring ==0.10.*
-    , text ==1.2.*
-  default-language: Haskell2010
+    exposed-modules:    HsNixPkgs.BootTools.HashRewrite
+    cc-options:         -O3
+    c-sources:          cbits/rewrite.c
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+    default-extensions: OverloadedStrings Strict
+    include-dirs:       include
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
 
-executable unpack-stdenv-linux
-  main-is: Main.hs
-  other-modules:
-      Paths_hsnixpkgs_stdenv_unpack
-  hs-source-dirs:
-      app/linux
-  default-extensions:
-      OverloadedStrings
-  ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      base ==4.15.*
-    , binary ==0.8.*
-    , bytestring ==0.10.*
-    , hsnixpkgs-stdenv-unpack
-    , lzma ==0.0.*
-    , nix-archive
-    , text ==1.2.*
-  default-language: Haskell2010
-  if os(linux)
-    buildable: True
-  else
-    buildable: False
+    build-depends:
+        base ^>=4.17,
+        text ^>=2.0,
+        bytestring ^>=0.11
+
+executable stdenv-unpack-linux
+    main-is:          Main.hs
+    hs-source-dirs:   app/linux
+    default-language: Haskell2010
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base ^>=4.17,
+        text ^>=2.0,
+        bytestring ^>=0.11,
+        nix-archive,
+        lzma,
+        binary ^>=0.8,
+        filepath ^>=1.4.100,
+        hsnixpkgs-stdenv-unpack
+
+    if !os(linux)
+        buildable: False

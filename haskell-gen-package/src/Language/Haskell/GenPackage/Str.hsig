@@ -1,0 +1,7 @@
+signature Language.Haskell.GenPackage.Str (Str) where
+
+import Data.String
+
+data Str
+
+instance IsString Str

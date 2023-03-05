@@ -1,6 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -12,82 +15,57 @@ module HsNixPkgs.Develop.Haskell.Package where
 import Data.Functor
 import Data.Hashable
 import Data.Singletons.Base.TH
-import Data.Singletons.TH.Options
 import Data.String
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import GHC.TypeLits
+import HsNix.Derivation
+import HsNix.DrvStr (DrvStr)
 import HsNixPkgs.Dependent
 import HsNixPkgs.Develop.C.Library
 import HsNixPkgs.ExtendDrv
-import Numeric.Natural
 
-data GHCVersion = GHCVersion Natural Natural Natural
-  deriving (Eq, Ord, Show)
+singletons
+  [d|
+    data GHCVersion = GHCVersion Natural Natural Natural
+      deriving (Eq, Ord, Show)
 
-data PGHCVersion = PGHCVersion Nat Nat Nat
+    newtype HSCompiler = HscGHC GHCVersion
+      deriving (Eq, Ord, Show)
 
-newtype HSCompiler = HscGHC GHCVersion
-  deriving (Eq, Ord, Show)
+    ghc_9_4_3 :: HSCompiler
+    ghc_9_4_3 = HscGHC (GHCVersion 9 4 3)
+    |]
 
-newtype PHSCompiler = PHscGHC PGHCVersion
+data HsDependent (hsc :: HSCompiler) b h t
+  = HsPackageDep (HsPackage hsc b h t)
+  | HsFFIDep (CLibrary b h t)
+  deriving (Eq, Show, Generic)
 
-let customPromote n
-      | n == ''GHCVersion = ''PGHCVersion
-      | n == 'GHCVersion = 'PGHCVersion
-      | n == ''HSCompiler = ''PHSCompiler
-      | n == 'HscGHC = 'PHscGHC
-      | n == ''Natural = ''Nat
-      | otherwise = promotedDataTypeOrConName defaultOptions n
- in withOptions
-      defaultOptions
-        { promotedDataTypeOrConName = customPromote,
-          defunctionalizedName = defunctionalizedName defaultOptions . customPromote
-        }
-      $ concat
-        <$> sequence
-          [ genSingletons [''GHCVersion, ''HSCompiler],
-            promoteEqInstances [''GHCVersion, ''HSCompiler],
-            singletons
-              [d|
-                ghc_9_0_2 :: HSCompiler
-                ghc_9_0_2 = HscGHC (GHCVersion 9 0 2)
-                |]
-          ]
-
-data HsDependent (hsc :: PHSCompiler) b h t m
-  = HsPackageDep (HsPackage hsc b h t m)
-  | HsFFIDep (CLibrary b h t m)
-  deriving (Generic)
-
-deriving instance (ApplicativeDeriv m) => Show (HsDependent hsc b h t m)
-
-deriving instance (ApplicativeDeriv m) => Eq (HsDependent hsc b h t m)
-
-instance (ApplicativeDeriv m) => Hashable (HsDependent hsc b h t m)
+instance Hashable (HsDependent hsc b h t)
 
 instance HasPropagatedDep (HsDependent hsc) [] where
   propagatedDep (HsPackageDep p) = hsDepends p
   propagatedDep (HsFFIDep _) = mempty
 
-data HsPackage (hsc :: PHSCompiler) b h t m = HsPackage
-  { hsOutputDrv :: DrvOutput h t m,
+data HsPackage (hsc :: HSCompiler) b h t = HsPackage
+  { hsOutputDrv :: DrvOutput h t,
     hsPkgs :: [Text],
-    hsDepends :: SimpleDeps [] (HsDependent hsc) b h t m
+    hsDepends :: SimpleDeps [] (HsDependent hsc) b h t
   }
+  deriving (Show)
 
-deriving instance (ApplicativeDeriv m) => Show (HsPackage hsc b h t m)
+instance Eq (HsPackage hsc b h t) where
+  l == r = hsOutputDrv l == hsOutputDrv r
 
-deriving instance (ApplicativeDeriv m) => Eq (HsPackage hsc b h t m)
-
-instance (ApplicativeDeriv m) => Hashable (HsPackage hsc b h t m) where
+instance Hashable (HsPackage hsc b h t) where
   hashWithSalt s a = hashWithSalt s (hsOutputDrv a)
 
 packageConfDir ::
-  forall hsc b h t m.
-  (SingI hsc, ApplicativeDeriv m) =>
-  HsPackage hsc b h t m ->
-  m (DrvStr m)
+  forall hsc b h t.
+  SingI hsc =>
+  HsPackage hsc b h t ->
+  DrvM DrvStr
 packageConfDir pkg =
   let (HscGHC (GHCVersion ma mi r)) = fromSing (sing @hsc)
    in getStorePathStr (hsOutputDrv pkg) <&> \o ->

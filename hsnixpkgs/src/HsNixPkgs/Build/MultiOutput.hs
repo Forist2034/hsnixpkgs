@@ -1,15 +1,17 @@
-module HsNixPkgs.Build.MultiOutput
-  ( MultiOutput (..),
-    defMultiOutput,
-    getMultiOutPath,
-  )
-where
+{-# LANGUAGE DeriveTraversable #-}
+
+module HsNixPkgs.Build.MultiOutput (
+  MultiOutput (..),
+  defMultiOutput,
+  getMultiOutPath,
+) where
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.List.NonEmpty as NEL
 import Data.Maybe
 import Data.Text (Text)
-import HsNixPkgs.HsBuilder.Generate
+import HsNix.OutputName
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 
 data MultiOutput a = MultiOutput
@@ -24,46 +26,33 @@ data MultiOutput a = MultiOutput
     outDevMan :: a,
     outInfo :: a
   }
-  deriving (Show)
+  deriving (Show, Functor, Foldable, Traversable)
 
-defMultiOutput :: Text -> NEL.NonEmpty Text -> MultiOutput Text
+defMultiOutput :: Text -> NEL.NonEmpty OutputName -> MultiOutput OutputName
 defMultiOutput sdn os =
-  let dev = getOrDefault "dev" "out"
-      bin = getOrDefault "bin" "out"
+  let dev = getOrDefault "dev" outON
+      bin = getOrDefault "bin" outON
       man = getOrDefault "man" bin
    in MultiOutput
         { outDev = dev,
           outBin = bin,
           outInclude = getOrDefault "include" dev,
-          outLib = getOrDefault "lib" "out",
-          outDoc = getOrDefault "doc" "out",
-          outDevDoc = "devdoc",
+          outLib = getOrDefault "lib" outON,
+          outDoc = getOrDefault "doc" outON,
+          outDevDoc = makeOutputNameThrow "devdoc",
           outMan = man,
           outDevMan = getOrDefault "devman" (getOrDefault "devdoc" man),
           outInfo = getOrDefault "info" bin,
           shareDocName = sdn
         }
   where
+    outON = makeOutputNameThrow "out"
     getOrDefault v d =
-      if v `elem` os then v else d
-
-mapOutput :: (a -> b) -> MultiOutput a -> MultiOutput b
-mapOutput f m =
-  MultiOutput
-    { shareDocName = shareDocName m,
-      outDev = f (outDev m),
-      outBin = f (outBin m),
-      outInclude = f (outInclude m),
-      outLib = f (outLib m),
-      outDoc = f (outDoc m),
-      outDevDoc = f (outDevDoc m),
-      outMan = f (outMan m),
-      outDevMan = f (outDevMan m),
-      outInfo = f (outInfo m)
-    }
+      let onV = makeOutputNameThrow v
+       in if onV `elem` os then onV else d
 
 getMultiOutPath ::
-  HM.HashMap Text (Code HsQ FilePath) ->
-  MultiOutput Text ->
+  HM.HashMap OutputName (Code HsQ FilePath) ->
+  MultiOutput OutputName ->
   MultiOutput (Code HsQ FilePath)
-getMultiOutPath m = mapOutput (\o -> fromJust (HM.lookup o m))
+getMultiOutPath m = fmap (\o -> fromJust (HM.lookup o m))

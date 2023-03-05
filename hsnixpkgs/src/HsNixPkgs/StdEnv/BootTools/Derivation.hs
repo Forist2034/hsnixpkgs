@@ -1,66 +1,57 @@
-{-# LANGUAGE DeriveLift #-}
+module HsNixPkgs.StdEnv.BootTools.Derivation (
+  UnpackedDeriv (..),
+  unpackDeriv,
+) where
 
-module HsNixPkgs.StdEnv.BootTools.Derivation
-  ( UnpackedDeriv (..),
-    UnpackDerivArg (..),
-    unpackDeriv,
-  )
-where
-
-import Data.String
 import Data.Text (Text)
 import HsNix.Derivation
+import qualified HsNix.DrvStr.Builder as DSB
 import HsNix.Hash
-import HsNix.System
+import HsNix.StorePathName
+import HsNixPkgs.StdEnv.BootTools.UnpackArg
 import HsNixPkgs.Util
-import Language.Haskell.TH.Syntax (Lift)
 
-data UnpackedDeriv m = UnpackedDeriv
+data UnpackedDeriv = UnpackedDeriv
   { btName :: Text,
     btOriginalPath :: Text,
-    btDerivation :: Derivation m
+    btDerivation :: Derivation
   }
-
-data UnpackDerivArg = UnpackDerivArg
-  { udaName :: Text,
-    udaSystem :: System,
-    udaStoreName :: Text,
-    udaOrigStorePath :: Text
-  }
-  deriving (Show, Lift)
 
 unpackDeriv ::
-  ApplicativeDeriv m =>
-  Derivation m ->
+  Derivation ->
   UnpackDerivArg ->
-  Derivation m ->
-  [UnpackedDeriv m] ->
-  UnpackedDeriv m
+  Derivation ->
+  [UnpackedDeriv] ->
+  UnpackedDeriv
 unpackDeriv unpackExec uda packedTool depBt =
   UnpackedDeriv
     { btName = udaName uda,
       btOriginalPath = udaOrigStorePath uda,
       btDerivation =
-        derivation
+        derivation @SHA256
           ( do
-              builder <- storePathStr unpackExec
-              package <- storePathStr packedTool
+              builder <- drvStorePathStrOf unpackExec Nothing
+              package <- drvStorePathStrOf packedTool Nothing
               rewrite <-
                 traverse
                   ( \bt ->
                       fmap
                         ( \sp ->
                             unwordsDSB
-                              [ fromDrvStr (toDrvStr (btName bt)),
-                                fromDrvStr (toDrvStr (btOriginalPath bt)),
-                                fromDrvStr sp
+                              [ DSB.fromText (btName bt),
+                                DSB.fromText (btOriginalPath bt),
+                                DSB.fromDrvStr sp
                               ]
                         )
-                        (storePathStr (btDerivation bt))
+                        (drvStorePathStrOf (btDerivation bt) Nothing)
                   )
                   depBt
               pure
-                ( (defaultDrvArg @SHA256 (udaStoreName uda) builder (udaSystem uda))
+                ( ( defaultDrvArg
+                      (makeStorePathNameThrow (udaStoreName uda))
+                      builder
+                      (udaSystem uda)
+                  )
                     { drvArgs =
                         [ package,
                           "rewritePath",
@@ -68,11 +59,11 @@ unpackDeriv unpackExec uda packedTool depBt =
                         ],
                       drvPassAsFile =
                         [ ( "rewrite",
-                            toDrvStr
+                            DSB.toDrvStr
                               ( unlinesDSB
                                   ( "1"
-                                      : "out " <> fromDrvStr (toDrvStr (udaOrigStorePath uda))
-                                      : fromString (show (length depBt))
+                                      : "out " <> DSB.fromText (udaOrigStorePath uda)
+                                      : DSB.decimal (length depBt)
                                       : rewrite
                                   )
                               )

@@ -1,14 +1,13 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TupleSections #-}
 
-module HsNixPkgs.SetupHook.Executable
-  ( Executable (..),
-    executableDirs,
-    executableEnv,
-    setupExecutable,
-    executable,
-  )
-where
+module HsNixPkgs.SetupHook.Executable (
+  Executable (..),
+  executableDirs,
+  executableEnv,
+  setupExecutable,
+  executable,
+) where
 
 import Control.Applicative
 import Data.Default
@@ -18,31 +17,32 @@ import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Data.Singletons
 import Data.Text (Text)
+import HsNix.Derivation
+import qualified HsNix.DrvStr.Builder as DSB
 import HsNixPkgs.Dependent
 import HsNixPkgs.ExtendDrv
 import HsNixPkgs.SetupHook
 
-data Executable b h t m = Executable
-  { execDrvOutput :: DrvOutput h t m,
+data Executable b h t = Executable
+  { execDrvOutput :: DrvOutput h t,
     execSubDir :: [Text],
-    execDep :: SimpleDeps [] Executable b h t m
+    execDep :: SimpleDeps [] Executable b h t
   }
+  deriving (Show)
 
-deriving instance (ApplicativeDeriv m) => Show (Executable b h t m)
+instance Eq (Executable b h t) where
+  l == r = execDrvOutput l == execDrvOutput r
 
-deriving instance (ApplicativeDeriv m) => Eq (Executable b h t m)
-
-instance (ApplicativeDeriv m) => Hashable (Executable b h t m) where
+instance Hashable (Executable b h t) where
   hashWithSalt s e = hashWithSalt s (execDrvOutput e)
 
 instance HasPropagatedDep Executable [] where
   propagatedDep = execDep
 
 executableDirs ::
-  forall b h t m.
-  ApplicativeDeriv m =>
-  SimpleDeps [] Executable b h t m ->
-  m ([DrvStrBuilder m], [DrvStrBuilder m], [DrvStrBuilder m])
+  forall b h t.
+  SimpleDeps [] Executable b h t ->
+  DrvM ([DSB.Builder], [DSB.Builder], [DSB.Builder])
 executableDirs d = do
   eb <-
     pure []
@@ -59,8 +59,8 @@ executableDirs d = do
   pure (eb, eh, et)
   where
     setupExec ::
-      [Executable b1 h1 t1 m] ->
-      m ([DrvStrBuilder m] -> [DrvStrBuilder m])
+      [Executable b1 h1 t1] ->
+      DrvM ([DSB.Builder] -> [DSB.Builder])
     setupExec es =
       traverse
         ( \ex ->
@@ -73,9 +73,9 @@ executableDirs d = do
             ( \(p, sds) i ->
                 foldr'
                   ( \sd ->
-                      ( ( fromDrvStr p
+                      ( ( DSB.fromDrvStr p
                             <> "/"
-                            <> fromDrvStr (toDrvStr sd)
+                            <> DSB.fromText sd
                         )
                           :
                       )
@@ -87,37 +87,32 @@ executableDirs d = do
             exs
 
 executableEnv ::
-  forall m.
-  ApplicativeDeriv m =>
-  [DrvStrBuilder m] ->
-  [DrvStrBuilder m] ->
-  [DrvStrBuilder m] ->
-  SetupHook m
+  [DSB.Builder] ->
+  [DSB.Builder] ->
+  [DSB.Builder] ->
+  SetupHook
 executableEnv eb eh et =
   def
     { newEnv =
         HM.fromList
-          [ ("PATH", toDrvStr (toEnv eb)),
-            ("HOST_PATH", toDrvStr (toEnv eh)),
-            ("TARGET_PATH", toDrvStr (toEnv et))
+          [ ("PATH", DSB.toDrvStr (toEnv eb)),
+            ("HOST_PATH", DSB.toDrvStr (toEnv eh)),
+            ("TARGET_PATH", DSB.toDrvStr (toEnv et))
           ]
     }
   where
-    toEnv :: [DrvStrBuilder m] -> DrvStrBuilder m
+    toEnv :: [DSB.Builder] -> DSB.Builder
     toEnv [] = mempty
     toEnv (x : xs) = x <> ":" <> toEnv xs
 
-setupExecutable ::
-  ApplicativeDeriv m =>
-  SimpleDeps [] Executable b h t m ->
-  m (SetupHook m)
+setupExecutable :: SimpleDeps [] Executable b h t -> DrvM SetupHook
 setupExecutable =
   fmap (\(eb, eh, et) -> executableEnv eb eh et)
     . executableDirs
 
 executable ::
-  forall b h t m.
-  (SingI b, SingI h, ApplicativeDeriv m) =>
-  SimpleDeps [] Executable b h t m ->
-  m (SetupHook m)
+  forall b h t.
+  (SingI b, SingI h) =>
+  SimpleDeps [] Executable b h t ->
+  DrvM SetupHook
 executable es = setupExecutable (propagateDependencies [es])

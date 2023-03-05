@@ -5,7 +5,7 @@ module HsNixPkgs.Build.Fixup.MoveDocs (ForceShare (..), moveToShare) where
 import Data.Default
 import qualified HsNixPkgs.Boot.Build.Fixup.MoveDocs as B
 import HsNixPkgs.Build.Main (BIO)
-import HsNixPkgs.HsBuilder.Generate
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 

@@ -4,15 +4,16 @@
 {-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module HsNixPkgs.HsBuilder.Internal.BuildMod (buildMod) where
+module Language.Haskell.GenPackage.BuildMod (buildMod) where
 
 import Control.Applicative
 import Control.Monad.State.Strict
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
+import qualified Data.List.NonEmpty as NEL
 import Data.Maybe
-import HsNixPkgs.HsBuilder.Internal.BuildMod.TH
-import HsNixPkgs.HsBuilder.Internal.BuildMod.Types
+import Language.Haskell.GenPackage.BuildMod.TH
+import Language.Haskell.GenPackage.BuildMod.Types
 import Language.Haskell.TH.Ppr
 import Language.Haskell.TH.PprLib as P
 import Language.Haskell.TH.Syntax
@@ -24,6 +25,7 @@ let ign =
         [t|Lit|],
         [t|Bang|],
         [t|Overlap|],
+        [t|NEL.NonEmpty String|],
         --
         [t|Phases|],
         [t|RuleMatch|],

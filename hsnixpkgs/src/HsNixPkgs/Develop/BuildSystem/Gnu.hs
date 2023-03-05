@@ -1,60 +1,59 @@
 {-# LANGUAGE MonadComprehensions #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
-module HsNixPkgs.Develop.BuildSystem.Gnu
-  ( PhaseBuildInfo,
-    SourceList,
-    UnpackCfg (..),
-    UnpackPhase (..),
-    unpackExpr,
-    mkUnpackPhase,
-    unpackPhase,
-    PatchCfg (..),
-    Patch (..),
-    patchExpr,
-    mkPatchPhase,
-    patchPhase,
-    ConfigureCfg (..),
-    ConfigurePhase (..),
-    configureExpr,
-    mkConfigurePhase,
-    configurePhase,
-    MakeCfg (..),
-    BuildCfg (..),
-    buildExpr,
-    mkBuildPhase,
-    buildPhase,
-    CheckCfg (..),
-    CheckPhase (..),
-    checkExpr,
-    mkCheckPhase,
-    checkPhase,
-    InstallCfg (..),
-    InstallPhase (..),
-    installExpr,
-    mkInstallPhase,
-    installPhase,
-    SimpleFixupCfg (..),
-    simpleFixupCfg,
-    fixupExpr,
-    mkFixupPhase,
-    fixupPhase,
-    InstallCheckCfg (..),
-    InstallCheckPhase (..),
-    installCheckExpr,
-    mkInstallCheckPhase,
-    installCheckPhase,
-    DistCfg (..),
-    DistPhase (..),
-    distExpr,
-    mkDistPhase,
-    distPhase,
-    GnuBuildPhases (..),
-    simpleGnuBuildPhases,
-    GnuBuildCfg (..),
-    gnuBuildSystem,
-  )
-where
+module HsNixPkgs.Develop.BuildSystem.Gnu (
+  PhaseBuildInfo,
+  SourceList,
+  UnpackCfg (..),
+  UnpackPhase (..),
+  unpackExpr,
+  mkUnpackPhase,
+  unpackPhase,
+  PatchCfg (..),
+  Patch (..),
+  patchExpr,
+  mkPatchPhase,
+  patchPhase,
+  ConfigureCfg (..),
+  ConfigurePhase (..),
+  configureExpr,
+  mkConfigurePhase,
+  configurePhase,
+  MakeCfg (..),
+  BuildCfg (..),
+  buildExpr,
+  mkBuildPhase,
+  buildPhase,
+  CheckCfg (..),
+  CheckPhase (..),
+  checkExpr,
+  mkCheckPhase,
+  checkPhase,
+  InstallCfg (..),
+  InstallPhase (..),
+  installExpr,
+  mkInstallPhase,
+  installPhase,
+  SimpleFixupCfg (..),
+  simpleFixupCfg,
+  fixupExpr,
+  mkFixupPhase,
+  fixupPhase,
+  InstallCheckCfg (..),
+  InstallCheckPhase (..),
+  installCheckExpr,
+  mkInstallCheckPhase,
+  installCheckPhase,
+  DistCfg (..),
+  DistPhase (..),
+  distExpr,
+  mkDistPhase,
+  distPhase,
+  GnuBuildPhases (..),
+  simpleGnuBuildPhases,
+  GnuBuildCfg (..),
+  gnuBuildSystem,
+) where
 
 import Control.Applicative
 import Data.Bifunctor
@@ -68,8 +67,11 @@ import Data.Singletons
 import Data.String
 import Data.Text (Text)
 import qualified Data.Text as T
-import HsNix.Builtin.AddFile
+import HsNix.Derivation
+import HsNix.DrvStr (DrvStr)
+import qualified HsNix.DrvStr.Builder as DSB
 import HsNix.Hash (NamedHashAlgo)
+import HsNix.OutputName
 import qualified HsNixPkgs.Boot.Develop.BuildSystem.Gnu as B
 import HsNixPkgs.Build.Fixup
 import qualified HsNixPkgs.Build.Fixup.CompressManPages as F
@@ -90,7 +92,6 @@ import HsNixPkgs.Dependent
 import HsNixPkgs.Develop.NativeLibrary
 import HsNixPkgs.ExtendDrv
 import HsNixPkgs.HsBuilder.DepStr
-import HsNixPkgs.HsBuilder.Generate
 import HsNixPkgs.HsBuilder.OutputMod
 import HsNixPkgs.HsBuilder.Util
 import HsNixPkgs.SetupHook
@@ -99,29 +100,30 @@ import HsNixPkgs.StdEnv.MakeDeriv
 import HsNixPkgs.StdEnv.StdEnv
 import HsNixPkgs.System
 import HsNixPkgs.Util
+import Language.Haskell.GenPackage
 import Language.Haskell.TH hiding (Phases)
 import Language.Haskell.TH.Syntax hiding (Phases)
 
-type PhaseM m = DepModM 'MainModule m (Code HsQ Phase)
+type PhaseM = ModuleM 'MainModule (Code HsQ Phase)
 
-type ModExprM m = DepModM 'MainModule m (Code HsQ (BIO ()))
+type ModExprM = ModuleM 'MainModule (Code HsQ (BIO ()))
 
-type MkPhase m = Code HsQ (BIO ()) -> HsQ [Dec] -> PhaseM m
+type MkPhase = Code HsQ (BIO ()) -> HsQ [Dec] -> PhaseM
 
-mkDefPhDecl :: ModExprM m -> MkPhase m -> PhaseM m
+mkDefPhDecl :: ModExprM -> MkPhase -> PhaseM
 mkDefPhDecl me f = do
   e <- me
   f e (pure [])
 
-data PhaseBuildInfo m = PhaseBuildInfo
-  { multiOutputArg :: Maybe (MultiOutput Text, MultiOutput (Code HsQ FilePath)),
-    nativeLibSearchDir :: m [DrvStr m],
-    pathEnv :: m ([DrvStrBuilder m], [DrvStrBuilder m], [DrvStrBuilder m]),
-    outputs :: HM.HashMap Text (Code HsQ FilePath)
+data PhaseBuildInfo = PhaseBuildInfo
+  { multiOutputArg :: Maybe (MultiOutput OutputName, MultiOutput (Code HsQ FilePath)),
+    nativeLibSearchDir :: DrvM [DrvStr],
+    pathEnv :: DrvM ([DSB.Builder], [DSB.Builder], [DSB.Builder]),
+    outputs :: HM.HashMap OutputName (Code HsQ FilePath)
   }
 
-data UnpackPhase m = UnpackPhase
-  { unpackSources :: SourceList m,
+data UnpackPhase = UnpackPhase
+  { unpackSources :: SourceList,
     unpackSourceRoot :: FilePath,
     unpackCfg :: UnpackCfg
   }
@@ -160,14 +162,13 @@ data ConfigurePhase h t = ConfigurePhase
     configureCfg :: ConfigureCfg h t
   }
 
-mkConfigurePhase :: MkPhase m
+mkConfigurePhase :: MkPhase
 mkConfigurePhase = newPhase "configurePhase" "configuring"
 
 configureExpr ::
-  ApplicativeDeriv m =>
-  PhaseBuildInfo m ->
+  PhaseBuildInfo ->
   ConfigurePhase h t ->
-  ModExprM m
+  ModExprM
 configureExpr pbi cp@ConfigurePhase {configureCfg = cfg} = do
   msp <-
     if fixLibtool cfg
@@ -193,29 +194,32 @@ configureExpr pbi cp@ConfigurePhase {configureCfg = cfg} = do
     libSearchMod =
       stringModule
         "Configure.LibSearchPath"
-        ( DepStr
-            ( fmap
-                ( \s ->
-                    toDrvStr
-                      ( unlinesDSB
-                          [ "{-# LANGUAGE OverloadedStrings #-}",
-                            "module Configure.LibSearchPath where",
-                            mempty,
-                            "libSearchPath :: Text",
-                            "libSearchPath = \""
-                              <> unwordsDSB (fmap fromDrvStr s)
-                              <> "\""
-                          ]
-                      )
-                )
-                (nativeLibSearchDir pbi)
-            )
-        )
-        ["base", "text"]
-        ( Name
-            (OccName "libSearchPath")
-            (NameQ (ModName "Configure.LibSearchPath"))
-        )
+        StringModule
+          { smText =
+              DepStr
+                ( fmap
+                    ( \s ->
+                        DSB.toDrvStr
+                          ( unlinesDSB
+                              [ "{-# LANGUAGE OverloadedStrings #-}",
+                                "module Configure.LibSearchPath where",
+                                mempty,
+                                "libSearchPath :: Text",
+                                "libSearchPath = \""
+                                  <> unwordsDSB (fmap DSB.fromDrvStr s)
+                                  <> "\""
+                              ]
+                          )
+                    )
+                    (nativeLibSearchDir pbi)
+                ),
+            smExtDep = ["base", "text"],
+            smValue =
+              Name
+                (OccName "libSearchPath")
+                (NameQ (ModName "Configure.LibSearchPath"))
+          }
+
     configFlags :: Code HsQ [String]
     configFlags =
       listET
@@ -255,10 +259,9 @@ configureExpr pbi cp@ConfigurePhase {configureCfg = cfg} = do
         )
 
 configurePhase ::
-  ApplicativeDeriv m =>
-  PhaseBuildInfo m ->
+  PhaseBuildInfo ->
   ConfigurePhase h t ->
-  PhaseM m
+  PhaseM
 configurePhase pbi cp = mkDefPhDecl (configureExpr pbi cp) mkConfigurePhase
 
 newtype MakeCfg = MakeCfg {makeFile :: String}
@@ -282,7 +285,7 @@ instance Default BuildCfg where
         buildHook = def
       }
 
-mkBuildPhase :: MkPhase m
+mkBuildPhase :: MkPhase
 mkBuildPhase = newPhase "buildPhase" "building"
 
 buildExpr :: MakeCfg -> BuildCfg -> Code HsQ (BIO ())
@@ -301,7 +304,7 @@ buildExpr mc cfg =
         )
     ||]
 
-buildPhase :: MakeCfg -> BuildCfg -> PhaseM m
+buildPhase :: MakeCfg -> BuildCfg -> PhaseM
 buildPhase mc cfg = mkBuildPhase (buildExpr mc cfg) (pure [])
 
 data CheckP
@@ -325,7 +328,7 @@ data CheckPhase = CheckPhase
     checkCfg :: CheckCfg
   }
 
-mkCheckPhase :: MkPhase m
+mkCheckPhase :: MkPhase
 mkCheckPhase = newPhase "checkPhase" "running tests"
 
 checkExpr :: MakeCfg -> CheckPhase -> Code HsQ (BIO ())
@@ -348,7 +351,7 @@ checkExpr mc cp@CheckPhase {checkCfg = cfg} =
         )
     ||]
 
-checkPhase :: MakeCfg -> CheckPhase -> PhaseM m
+checkPhase :: MakeCfg -> CheckPhase -> PhaseM
 checkPhase mc cp = mkCheckPhase (checkExpr mc cp) (pure [])
 
 data InstallP
@@ -371,10 +374,10 @@ data InstallPhase = InstallPhase
     installCfg :: InstallCfg
   }
 
-mkInstallPhase :: MkPhase m
+mkInstallPhase :: MkPhase
 mkInstallPhase = newPhase "installPhase" "install"
 
-installExpr :: PhaseBuildInfo m -> MakeCfg -> InstallPhase -> Code HsQ (BIO ())
+installExpr :: PhaseBuildInfo -> MakeCfg -> InstallPhase -> Code HsQ (BIO ())
 installExpr pbi mc ip@InstallPhase {installCfg = cfg} =
   runHook
     (installHook cfg)
@@ -405,10 +408,10 @@ installExpr pbi mc ip@InstallPhase {installCfg = cfg} =
     ||]
 
 installPhase ::
-  PhaseBuildInfo m ->
+  PhaseBuildInfo ->
   MakeCfg ->
   InstallPhase ->
-  PhaseM m
+  PhaseM
 installPhase pbi mc ip = mkInstallPhase (installExpr pbi mc ip) (pure [])
 
 data SimpleFixupCfg h t = SimpleFixupCfg
@@ -440,10 +443,10 @@ instance Default (SimpleFixupCfg h t) where
       }
 
 simpleFixupCfg ::
-  (SingI h, SingI t, ApplicativeDeriv m) =>
-  PhaseBuildInfo m ->
+  (SingI h, SingI t) =>
+  PhaseBuildInfo ->
   SimpleFixupCfg h t ->
-  DepModM 'MainModule m [FixupTarget]
+  ModuleM 'MainModule [FixupTarget]
 simpleFixupCfg pbi cfg = do
   patchSheBangF <-
     if patchSheBang cfg
@@ -494,28 +497,31 @@ simpleFixupCfg pbi cfg = do
       let modName = "Fixup.PatchSheBang.Path"
        in stringModule
             modName
-            ( DepStr
-                ( fmap
-                    ( \(pb, ph, _) ->
-                        toDrvStr
-                          ( unlinesDSB
-                              [ "module " <> fromString modName <> " where",
-                                mempty,
-                                "path :: [FilePath]",
-                                "path = " <> toDSB pb,
-                                mempty,
-                                "hostPath :: [FilePath]",
-                                "hostPath = " <> toDSB ph
-                              ]
-                          )
-                    )
-                    (pathEnv pbi)
-                )
-            )
-            []
-            ( Name (OccName "path") (NameQ (ModName modName)),
-              Name (OccName "hostPath") (NameQ (ModName modName))
-            )
+            StringModule
+              { smText =
+                  DepStr
+                    ( fmap
+                        ( \(pb, ph, _) ->
+                            DSB.toDrvStr
+                              ( unlinesDSB
+                                  [ "module " <> fromString modName <> " where",
+                                    mempty,
+                                    "path :: [FilePath]",
+                                    "path = " <> toDSB pb,
+                                    mempty,
+                                    "hostPath :: [FilePath]",
+                                    "hostPath = " <> toDSB ph
+                                  ]
+                              )
+                        )
+                        (pathEnv pbi)
+                    ),
+                smExtDep = [],
+                smValue =
+                  ( Name (OccName "path") (NameQ (ModName modName)),
+                    Name (OccName "hostPath") (NameQ (ModName modName))
+                  )
+              }
     quoteDSB x = "\"" <> x <> "\""
     toDSB [] = mempty
     toDSB [x] = "[" <> quoteDSB x <> "]"
@@ -546,7 +552,7 @@ data InstallCheckPhase = InstallCheckPhase
     installCheckCfg :: InstallCheckCfg
   }
 
-mkInstallCheckPhase :: MkPhase m
+mkInstallCheckPhase :: MkPhase
 mkInstallCheckPhase = newPhase "installCheckPhase" "running install tests"
 
 installCheckExpr :: MakeCfg -> InstallCheckPhase -> Code HsQ (BIO ())
@@ -569,7 +575,7 @@ installCheckExpr mc icp@InstallCheckPhase {installCheckCfg = cfg} =
         )
     ||]
 
-installCheckPhase :: MakeCfg -> InstallCheckPhase -> PhaseM m
+installCheckPhase :: MakeCfg -> InstallCheckPhase -> PhaseM
 installCheckPhase mc ip = mkInstallCheckPhase (installCheckExpr mc ip) (pure [])
 
 data DistP
@@ -592,7 +598,7 @@ data DistPhase = DistPhase
     distCfg :: DistCfg
   }
 
-mkDistPhase :: MkPhase m
+mkDistPhase :: MkPhase
 mkDistPhase = newPhase "distPhase" "distPhase"
 
 distExpr :: MakeCfg -> DistPhase -> Code HsQ (BIO ())
@@ -618,36 +624,36 @@ distExpr mc dp@DistPhase {distCfg = cfg} =
         )
     ||]
 
-distPhase :: MakeCfg -> DistPhase -> PhaseM m
+distPhase :: MakeCfg -> DistPhase -> PhaseM
 distPhase mc dp = mkDistPhase (distExpr mc dp) (pure [])
 
-type Phases m = [PhaseM m]
+type Phases = [PhaseM]
 
-type DefPhase m a = Either (Phases m) a
+type DefPhase a = Either Phases a
 
-data GnuBuildPhases h t m = GnuBuildPhases
-  { prePhases :: Phases m,
-    unpackArg :: DefPhase m (UnpackPhase m),
-    patchArg :: DefPhase m (NEL.NonEmpty (Patch m), PatchCfg),
-    preConfigurePhases :: Phases m,
-    configureArg :: DefPhase m (ConfigurePhase h t),
-    preBuildPhases :: Phases m,
-    buildArg :: DefPhase m BuildCfg,
-    checkArg :: DefPhase m CheckPhase,
-    preInstallPhases :: Phases m,
-    installArg :: DefPhase m InstallPhase,
-    fixupArg :: DefPhase m (Hook FixupP, SimpleFixupCfg h t),
-    installCheckArg :: DefPhase m InstallCheckPhase,
-    preDistPhases :: Phases m,
-    distArg :: DefPhase m DistPhase,
-    postPhases :: Phases m
+data GnuBuildPhases h t = GnuBuildPhases
+  { prePhases :: Phases,
+    unpackArg :: DefPhase UnpackPhase,
+    patchArg :: DefPhase (NEL.NonEmpty Patch, PatchCfg),
+    preConfigurePhases :: Phases,
+    configureArg :: DefPhase (ConfigurePhase h t),
+    preBuildPhases :: Phases,
+    buildArg :: DefPhase BuildCfg,
+    checkArg :: DefPhase CheckPhase,
+    preInstallPhases :: Phases,
+    installArg :: DefPhase InstallPhase,
+    fixupArg :: DefPhase (Hook FixupP, SimpleFixupCfg h t),
+    installCheckArg :: DefPhase InstallCheckPhase,
+    preDistPhases :: Phases,
+    distArg :: DefPhase DistPhase,
+    postPhases :: Phases
   }
 
 simpleGnuBuildPhases ::
-  DefPhase m (UnpackPhase m) ->
-  DefPhase m (ConfigurePhase h t) ->
-  DefPhase m InstallPhase ->
-  GnuBuildPhases h t m
+  DefPhase UnpackPhase ->
+  DefPhase (ConfigurePhase h t) ->
+  DefPhase InstallPhase ->
+  GnuBuildPhases h t
 simpleGnuBuildPhases u c i =
   GnuBuildPhases
     { prePhases = [],
@@ -667,15 +673,15 @@ simpleGnuBuildPhases u c i =
       postPhases = []
     }
 
-toPhases :: (a -> PhaseM m) -> DefPhase m a -> Phases m
+toPhases :: (a -> PhaseM) -> DefPhase a -> Phases
 toPhases f = either id (L.singleton . f)
 
 buildPhases ::
-  (SingI h, SingI t, BuiltinAddText m) =>
-  PhaseBuildInfo m ->
+  (SingI h, SingI t) =>
+  PhaseBuildInfo ->
   MakeCfg ->
-  GnuBuildPhases h t m ->
-  DepModM 'MainModule m (Code HsQ (BIO ()))
+  GnuBuildPhases h t ->
+  ModuleM 'MainModule (Code HsQ (BIO ()))
 buildPhases pbi ma bp =
   runPhases
     <$> sequence
@@ -710,33 +716,32 @@ buildPhases pbi ma bp =
           ]
       )
 
-data GnuBuildCfg b h t a m = GnuBuildCfg
-  { mkDerivArg :: MkDerivationArg a m,
+data GnuBuildCfg b h t a = GnuBuildCfg
+  { mkDerivArg :: MkDerivationArg a,
     multiOutputDocName :: Text,
-    multiOutput :: Maybe (MultiOutput Text -> MultiOutput Text),
-    nativeLibs :: SimpleDeps [] NativeLib b h t m,
-    executables :: SimpleDeps [] Executable b h t m,
-    extraNativeLibs :: [(SimpleDeps [] NativeLib b h t m, m (SetupHook m))],
-    setupHooks :: [m (SetupHook m)],
-    builderCfg :: BuilderCfg b m
+    multiOutput :: Maybe (MultiOutput OutputName -> MultiOutput OutputName),
+    nativeLibs :: SimpleDeps [] NativeLib b h t,
+    executables :: SimpleDeps [] Executable b h t,
+    extraNativeLibs :: [(SimpleDeps [] NativeLib b h t, DrvM SetupHook)],
+    setupHooks :: [DrvM SetupHook],
+    builderCfg :: BuilderCfg b
   }
 
 gnuBuildSystem ::
-  (SingI b, SingI h, SingI t, BuiltinAddText m, NamedHashAlgo a) =>
-  StdEnv s b h t m ->
-  GnuBuildCfg b h t a m ->
-  ( HM.HashMap Text (Code HsQ FilePath) ->
-    Maybe (MultiOutput Text) ->
-    PhaseBuildInfo m ->
-    DepModM 'MainModule m (MakeCfg, GnuBuildPhases h t m)
+  (SingI b, SingI h, SingI t, NamedHashAlgo a) =>
+  StdEnv s b h t ->
+  GnuBuildCfg b h t a ->
+  ( HM.HashMap OutputName (Code HsQ FilePath) ->
+    Maybe (MultiOutput OutputName) ->
+    PhaseBuildInfo ->
+    ModuleM 'MainModule (MakeCfg, GnuBuildPhases h t)
   ) ->
-  ExtendDeriv h t m
+  ExtendDeriv h t
 gnuBuildSystem std gbc gbpF =
   let out = outputOpts (mkDerivArg gbc)
       multiCfg =
         multiOutput gbc
-          <*> Just
-            (defMultiOutput (multiOutputDocName gbc) out)
+          <*> Just (defMultiOutput (multiOutputDocName gbc) out)
       execDirs = executableDirs (executables gbc <> stdEnvExec std)
       (nLib, mSt) = collectDepsA (nativeLibs gbc) (extraNativeLibs gbc)
    in mkDerivation

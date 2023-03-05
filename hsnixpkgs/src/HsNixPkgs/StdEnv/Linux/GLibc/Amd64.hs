@@ -13,14 +13,16 @@ import HsNixPkgs.StdEnv.BootTools.TH
 import HsNixPkgs.StdEnv.Linux.SupportTools.Amd64
 import HsNixPkgs.StdEnv.StdEnv
 import HsNixPkgs.System
+import Language.Haskell.TH (unsafeCodeCoerce)
 
-decodeSpec "stdenv/linux/amd64/glibc.yaml"
+decodeSpec "stdenv/spec/linux/amd64/glibc.yaml"
   >>= mkBootDerivations
-    [|unpackStdenvLinux|]
+    ''UnpackedDeriv
+    (unsafeCodeCoerce [|unpackDeriv unpackStdenvLinux|])
     NS.x86_64_linux
-    [|requireFile|]
+    (unsafeCodeCoerce [|requireFile|])
 
-mkExec :: UnpackedDeriv m -> Executable b h t m
+mkExec :: UnpackedDeriv -> Executable b h t
 mkExec bd =
   Executable
     { execDrvOutput =
@@ -33,13 +35,11 @@ mkExec bd =
     }
 
 bootStdEnv ::
-  ApplicativeDeriv m =>
   StdEnv
     'BootStage
     Amd64_unknown_linux_gnu
     Amd64_unknown_linux_gnu
     Amd64_unknown_linux_gnu
-    m
 bootStdEnv =
   StdEnv
     { stdEnvGhc =

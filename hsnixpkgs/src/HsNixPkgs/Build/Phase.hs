@@ -1,20 +1,19 @@
 {-# LANGUAGE TemplateHaskellQuotes #-}
 
-module HsNixPkgs.Build.Phase
-  ( Phase,
-    phaseExpr,
-    phaseDeclAs,
-    phaseDecl,
-    newPhase,
-    runPhases,
-  )
-where
+module HsNixPkgs.Build.Phase (
+  Phase,
+  phaseExpr,
+  phaseDeclAs,
+  phaseDecl,
+  newPhase,
+  runPhases,
+) where
 
 import HsNixPkgs.Boot.Build.Phase hiding (runPhases)
 import qualified HsNixPkgs.Boot.Build.Phase as B
 import HsNixPkgs.Build.Main (BIO)
-import HsNixPkgs.HsBuilder.Generate
 import HsNixPkgs.HsBuilder.Util
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
@@ -58,7 +57,7 @@ newPhase ::
   String ->
   Code HsQ (BIO ()) ->
   HsQ [Dec] ->
-  ModuleM s mt (Code HsQ Phase)
+  ModuleM mt (Code HsQ Phase)
 newPhase n d e ld =
   unsafeCodeCoerce . varE
     <$> declFun (phaseDecl n d e ld)

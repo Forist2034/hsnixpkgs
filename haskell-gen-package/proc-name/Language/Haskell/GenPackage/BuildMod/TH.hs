@@ -3,7 +3,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module HsNixPkgs.HsBuilder.Internal.BuildMod.TH (deriveWalk) where
+module Language.Haskell.GenPackage.BuildMod.TH (deriveWalk) where
 
 import Control.Applicative (Applicative (liftA2))
 import Control.Monad
@@ -11,7 +11,7 @@ import Data.Bifunctor
 import Data.Functor
 import Data.Maybe
 import qualified Data.Set as S
-import HsNixPkgs.HsBuilder.Internal.BuildMod.Types
+import Language.Haskell.GenPackage.BuildMod.Types
 import Language.Haskell.TH
 
 idE :: Name -> Q Clause
@@ -117,9 +117,9 @@ walkE ign = procExp
                             Nothing
                             ( stmt
                                 ++ [ NoBindS
-                                       ( VarE 'pure
-                                           `AppE` TupE (fmap (Just . VarE) tv)
-                                       )
+                                      ( VarE 'pure
+                                          `AppE` TupE (fmap (Just . VarE) tv)
+                                      )
                                    ]
                             )
                         )
@@ -145,7 +145,7 @@ deriveCon ign =
         NormalC cn [] ->
           pure
             ( Clause
-                [ConP cn []]
+                [ConP cn [] []]
                 (NormalB (VarE 'pure `AppE` ConE cn))
                 []
             )
@@ -162,7 +162,7 @@ deriveCon ign =
                             (VarP x, (Just (BindS (VarP v) (e `AppE` VarE x)), VarE v))
                         Nothing -> pure (VarP x, (Nothing, VarE x))
                   )
-                  (ConP cn)
+                  (ConP cn [])
                   (foldl AppE (ConE cn))
                   pe
         RecC cn bt ->

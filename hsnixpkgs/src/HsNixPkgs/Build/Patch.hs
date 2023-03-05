@@ -3,22 +3,19 @@
 {-# LANGUAGE TemplateHaskellQuotes #-}
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
-module HsNixPkgs.Build.Patch
-  ( PatchP,
-    PatchCfg (..),
-    Patch (..),
-    patchExpr,
-    mkPatchPhase,
-    patchPhase,
-  )
-where
+module HsNixPkgs.Build.Patch (
+  PatchP,
+  PatchCfg (..),
+  Patch (..),
+  patchExpr,
+  mkPatchPhase,
+  patchPhase,
+) where
 
 import Control.Monad.IO.Class
 import Data.Default
 import qualified Data.List.NonEmpty as NEL
-import Data.Text (Text)
 import qualified Data.Text as T
-import HsNix.Builtin.AddFile
 import qualified HsNix.Derivation as ND
 import qualified HsNixPkgs.Boot.Build.Patch as B
 import HsNixPkgs.Build.Hook
@@ -26,7 +23,8 @@ import HsNixPkgs.Build.Main (BIO)
 import HsNixPkgs.Build.Phase
 import HsNixPkgs.ExtendDrv
 import HsNixPkgs.HsBuilder.DepStr
-import HsNixPkgs.HsBuilder.Generate
+import HsNixPkgs.HsBuilder.KVMod
+import Language.Haskell.GenPackage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
@@ -44,19 +42,12 @@ instance Default PatchCfg where
         patchHook = def
       }
 
-data Patch m
-  = TextPatch
-      { patchName :: String,
-        patchTxtFilename :: Text,
-        patchTxtContent :: Text
-      }
-  | DrvFilePatch (FileDeriv m 'RegularFDrv)
+newtype Patch = SrcPatch (FileSource 'RegularFSrc)
 
 patchExpr ::
-  BuiltinAddText m =>
-  NEL.NonEmpty (Patch m) ->
+  NEL.NonEmpty Patch ->
   PatchCfg ->
-  DepModM mt m (Code HsQ (BIO ()))
+  ModuleM mt (Code HsQ (BIO ()))
 patchExpr patches cfg = do
   mp <-
     useModule
@@ -65,18 +56,12 @@ patchExpr patches cfg = do
           ["base"]
           []
           ( fmap
-              ( \case
-                  TextPatch
-                    { patchName = n,
-                      patchTxtFilename = f,
-                      patchTxtContent = c
-                    } ->
-                      (n, "FilePath", DepStr (addTextFileStr f c))
-                  DrvFilePatch f ->
-                    ( T.unpack (fDrvName f),
-                      "FilePath",
-                      DepStr (ND.storePathStr (fDrvBase f))
-                    )
+              ( \(SrcPatch sp) ->
+                  KVPair
+                    { kvKey = T.unpack (fSrcName sp),
+                      kvType = "FilePath",
+                      kvValue = DepStr (ND.srcStorePathStr (fSrcBase sp))
+                    }
               )
               patches
           )
@@ -106,34 +91,31 @@ patchExpr patches cfg = do
         )
     )
   where
-    applyPatch (TextPatch {patchName = n}) e flag =
-      [|B.applyPatch $(lift n) $flag (B.plainText $e)|]
-    applyPatch (DrvFilePatch f) e flag =
+    applyPatch (SrcPatch f) e flag =
       [|
         B.applyPatch
-          $(lift (T.unpack (fDrvName f)))
+          $(lift (T.unpack (fSrcName f)))
           $flag
-          $( let fn = fDrvFilename f
+          $( let fn = fSrcName f
               in if
-                     | ".gz" `T.isSuffixOf` fn -> [|B.unGzip $e|]
-                     | ".bz2" `T.isSuffixOf` fn -> [|B.unBzip2 $e|]
-                     | ".xz" `T.isSuffixOf` fn -> [|B.unXz $e|]
-                     | ".lzma" `T.isSuffixOf` fn -> [|B.unLzma $e|]
-                     | otherwise -> error ("Unknown patch format " ++ show fn)
+                    | ".gz" `T.isSuffixOf` fn -> [|B.unGzip $e|]
+                    | ".bz2" `T.isSuffixOf` fn -> [|B.unBzip2 $e|]
+                    | ".xz" `T.isSuffixOf` fn -> [|B.unXz $e|]
+                    | ".lzma" `T.isSuffixOf` fn -> [|B.unLzma $e|]
+                    | otherwise -> error ("Unknown patch format " ++ show fn)
            )
         |]
 
 mkPatchPhase ::
   Code HsQ (BIO ()) ->
   HsQ [Dec] ->
-  ModuleM s mt (Code HsQ Phase)
+  ModuleM mt (Code HsQ Phase)
 mkPatchPhase = newPhase "patchPhase" "patching sources"
 
 patchPhase ::
-  (BuiltinAddText m) =>
-  NEL.NonEmpty (Patch m) ->
+  NEL.NonEmpty Patch ->
   PatchCfg ->
-  DepModM mt m (Code HsQ Phase)
+  ModuleM mt (Code HsQ Phase)
 patchPhase p cfg = do
   fun <- patchExpr p cfg
   mkPatchPhase fun (pure [])
