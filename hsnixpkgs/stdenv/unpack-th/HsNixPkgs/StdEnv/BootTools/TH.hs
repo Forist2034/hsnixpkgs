@@ -18,8 +18,7 @@ import qualified Data.Yaml as Yaml
 import qualified HsNix.Hash as NH
 import HsNix.StorePathName
 import HsNix.System
-import HsNixPkgs.BootTools.Derivation
-import HsNixPkgs.BootTools.SupportTools
+import HsNixPkgs.BootTools.Types
 import HsNixPkgs.StdEnv.BootTools.UnpackArg
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax

@@ -30,7 +30,7 @@ copyHsTools dest compileBuilder unpackBootTools = do
   let d = dest </> "hsnixpkgs-support"
   createDirectory d
   cb <- copySupportTool "compile-builder" True (compileBuilder </> "bin") d
-  ubt <- copySupportTool "unpack-stdenv-linux" True (unpackBootTools </> "bin") d
+  ubt <- copySupportTool "stdenv-unpack-linux" True (unpackBootTools </> "bin") d
   BS.writeFile
     (dest </> "support-tool.yaml")
     (Yaml.encodePretty Yaml.defConfig [cb, ubt])

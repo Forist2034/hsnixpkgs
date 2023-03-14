@@ -62,7 +62,7 @@ main =
               [ SourceRepositoryPackage
                   { srpType = vcsRepoType vcsGit,
                     srpLocation = "https://github.com/Forist2034/nix-core",
-                    srpTag = Just "9fa7f689681bc0d896cdfd4d325d2569bc52f8bc",
+                    srpTag = Just "0ea47cacbc4cb494211bb051fed24e2fd52baf05",
                     srpBranch = Nothing,
                     srpSubdir = ["nix-archive", "hsnix-core", "hsnix-drv"],
                     srpCommand = []

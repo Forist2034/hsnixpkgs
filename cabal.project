@@ -9,5 +9,5 @@ allow-newer: relude:base, relude:ghc-prim
 source-repository-package
   type:git
   location:https://github.com/Forist2034/nix-core
-  tag:9fa7f689681bc0d896cdfd4d325d2569bc52f8bc
+  tag:0ea47cacbc4cb494211bb051fed24e2fd52baf05
   subdir:nix-archive hsnix-core hsnix-drv

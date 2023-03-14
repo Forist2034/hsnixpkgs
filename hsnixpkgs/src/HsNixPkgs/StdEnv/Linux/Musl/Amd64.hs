@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module HsNixPkgs.StdEnv.Linux.GLibc.Amd64 (bootStdEnv) where
+module HsNixPkgs.StdEnv.Linux.Musl.Amd64 (bootStdEnv) where
 
 import qualified HsNix.System as NS
 import HsNixPkgs.Dependent
@@ -15,10 +15,10 @@ import HsNixPkgs.StdEnv.StdEnv
 import HsNixPkgs.System
 import Language.Haskell.TH (unsafeCodeCoerce)
 
-decodeSpec "stdenv/spec/linux/amd64/glibc.yaml"
+decodeSpec "stdenv/spec/linux/amd64/musl.yaml"
   >>= mkBootDerivations
     ''UnpackedDeriv
-    (unsafeCodeCoerce [|unpackDeriv unpackStdenvLinux|])
+    (unsafeCodeCoerce [|unpackDeriv stdenvUnpackLinux|])
     NS.x86_64_linux
     (unsafeCodeCoerce [|requireFile|])
 

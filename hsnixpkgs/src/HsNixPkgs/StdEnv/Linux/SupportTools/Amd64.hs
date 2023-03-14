@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module HsNixPkgs.StdEnv.Linux.SupportTools.Amd64 (unpackStdenvLinux, compileBuilder) where
+module HsNixPkgs.StdEnv.Linux.SupportTools.Amd64 (stdenvUnpackLinux, compileBuilder) where
 
 import HsNix.Derivation
 import qualified HsNix.System as NS

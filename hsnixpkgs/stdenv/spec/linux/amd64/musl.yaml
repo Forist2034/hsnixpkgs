@@ -1,0 +1,513 @@
+- archive:
+    name: musl-1.2.3-j4hzb.nar.xz
+    sha256: c2cd0644263e0bc40459f71c3c1484e9841ed71cb5f73890f9b066c4d5a0711a
+    uncompressed_size: 3829096
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: musl-1.2.3-j4hzb
+  old_store_path: /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  store_name: musl-1.2.3
+- archive:
+    name: gcc-11.3.0-lib-vwbzm.nar.xz
+    sha256: d57c55c0a0ac73abd21f6f8eb0b784923f4354513a76f9ba2a581adbf7280646
+    uncompressed_size: 4107560
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: false
+  name: gcc-11.3.0-lib-vwbzm
+  old_store_path: /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  store_name: gcc-11.3.0-lib
+- archive:
+    name: gmp-with-cxx-stage4-6.2.1-jmfvb.nar.xz
+    sha256: ea3409c243c8789fbdb857dbb0b8f412430a78cc2fa37291dc0ee54add4b4279
+    uncompressed_size: 2542000
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jmfvbz6zw9pqxa93j3sdb33l43f5nk1g-gmp-with-cxx-stage4-6.2.1
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: false
+  name: gmp-with-cxx-stage4-6.2.1-jmfvb
+  old_store_path: /nix/store/jmfvbz6zw9pqxa93j3sdb33l43f5nk1g-gmp-with-cxx-stage4-6.2.1
+  store_name: gmp-with-cxx-stage4-6.2.1
+- archive:
+    name: coreutils-9.1-5ccfa.nar.xz
+    sha256: 7629b3dbce6b462d4c3bd1ad9b4048fa434feb65d2dc2ba6fe3a2673e1899ff6
+    uncompressed_size: 1479704
+  dependent:
+  - /nix/store/5ccfal20h9zp4zbkkrkd5sr7bfskqka0-coreutils-9.1
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jmfvbz6zw9pqxa93j3sdb33l43f5nk1g-gmp-with-cxx-stage4-6.2.1
+  exported: true
+  name: coreutils
+  old_store_path: /nix/store/5ccfal20h9zp4zbkkrkd5sr7bfskqka0-coreutils-9.1
+  store_name: coreutils-9.1
+- archive:
+    name: bash-5.1-p16-dl1r8.nar.xz
+    sha256: 02e51b5a2c40fd6d36ab8da3e30db172fc7070e349d90c849b490d9f193df0b5
+    uncompressed_size: 1531720
+  dependent:
+  - /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: bash
+  old_store_path: /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  store_name: bash-5.1-p16
+- archive:
+    name: attr-2.5.1-yn2nk.nar.xz
+    sha256: e2924963beced9d2ff713bc3355c68cc4fa6d343b88656a3a4ff90c2df57cf4e
+    uncompressed_size: 34048
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/yn2nk5hzx5mbgbm5crqybn6v5bnpzbb6-attr-2.5.1
+  exported: false
+  name: attr-2.5.1-yn2nk
+  old_store_path: /nix/store/yn2nk5hzx5mbgbm5crqybn6v5bnpzbb6-attr-2.5.1
+  store_name: attr-2.5.1
+- archive:
+    name: acl-2.3.1-6x8ny.nar.xz
+    sha256: 724e363e1d930207223f1e1fc29b04079f2ea153f362841a853be9597c73760b
+    uncompressed_size: 46600
+  dependent:
+  - /nix/store/6x8nyrqnlmba9hxp65j1sdhd88gnyi75-acl-2.3.1
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/yn2nk5hzx5mbgbm5crqybn6v5bnpzbb6-attr-2.5.1
+  exported: false
+  name: acl-2.3.1-6x8ny
+  old_store_path: /nix/store/6x8nyrqnlmba9hxp65j1sdhd88gnyi75-acl-2.3.1
+  store_name: acl-2.3.1
+- archive:
+    name: coreutils-9.1-x2md2.nar.xz
+    sha256: eb498430617b26b561afe184d2d7349800894a52c2ca8eee3de2468484e96ad4
+    uncompressed_size: 1480960
+  dependent:
+  - /nix/store/6x8nyrqnlmba9hxp65j1sdhd88gnyi75-acl-2.3.1
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jmfvbz6zw9pqxa93j3sdb33l43f5nk1g-gmp-with-cxx-stage4-6.2.1
+  - /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  - /nix/store/yn2nk5hzx5mbgbm5crqybn6v5bnpzbb6-attr-2.5.1
+  exported: false
+  name: coreutils-9.1-x2md2
+  old_store_path: /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  store_name: coreutils-9.1
+- archive:
+    name: findutils-4.9.0-kgj96.nar.xz
+    sha256: c97769e2e11be7eb641cf3fd87c4ceb200b1368f1b2f0b4d840cfb251e507f99
+    uncompressed_size: 511048
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  exported: true
+  name: findutils
+  old_store_path: /nix/store/kgj96b95y0zpf4y9j7kyvs68klf0x33n-findutils-4.9.0
+  store_name: findutils-4.9.0
+- archive:
+    name: diffutils-3.8-lbixf.nar.xz
+    sha256: 8976725cd2833504e1ae24c5aad4dd22e42a6007a650ccb84f61b3d55781fbcf
+    uncompressed_size: 442656
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  exported: true
+  name: diffutils
+  old_store_path: /nix/store/lbixfp9fyw48g8bz04vmixg1a8zv818z-diffutils-3.8
+  store_name: diffutils-3.8
+- archive:
+    name: gnused-4.8-yadx8.nar.xz
+    sha256: f44b2b75f67f7d525fe23ee61fc71c04460d2d8b45656842c94a8a11ead933ed
+    uncompressed_size: 207792
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: sed
+  old_store_path: /nix/store/yadx89z9vi1v23fjg8z10zycsj3pdmzz-gnused-4.8
+  store_name: gnused-4.8
+- archive:
+    name: pcre-8.45-gr1bn.nar.xz
+    sha256: d272344495b74e60df735b9737f643881c88b4ed7f1e31d544269a7d3a0ea0bb
+    uncompressed_size: 518376
+  dependent:
+  - /nix/store/gr1bndp32ssaf8v8lxswfznycyl63pav-pcre-8.45
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: pcre-8.45-gr1bn
+  old_store_path: /nix/store/gr1bndp32ssaf8v8lxswfznycyl63pav-pcre-8.45
+  store_name: pcre-8.45
+- archive:
+    name: gnugrep-3.7-i380z.nar.xz
+    sha256: 2e6a6de9b5175e26700de7808c3558e6a788dbbcd6c39ded5cc3d23736611fc3
+    uncompressed_size: 277528
+  dependent:
+  - /nix/store/gr1bndp32ssaf8v8lxswfznycyl63pav-pcre-8.45
+  - /nix/store/i380zsb8n6byh11sb0nzdl1lbni373d0-gnugrep-3.7
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: grep
+  old_store_path: /nix/store/i380zsb8n6byh11sb0nzdl1lbni373d0-gnugrep-3.7
+  store_name: gnugrep-3.7
+- archive:
+    name: gawk-5.1.1-hlg5b.nar.xz
+    sha256: 1e9695c58af35805276e5f35dc6c33776ce827c7b55f171863c6d7ad6a6fdcfb
+    uncompressed_size: 2434120
+  dependent:
+  - /nix/store/hlg5bk4xlgr0swi7h41iyaj339x49way-gawk-5.1.1
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: gawk
+  old_store_path: /nix/store/hlg5bk4xlgr0swi7h41iyaj339x49way-gawk-5.1.1
+  store_name: gawk-5.1.1
+- archive:
+    name: gnutar-1.34-03rn2.nar.xz
+    sha256: 2b428695e58aea0124cfcb23e0a61c632de3f9d963b3d957da9248beef20bd3a
+    uncompressed_size: 2920616
+  dependent:
+  - /nix/store/03rn2bin3r2dlknx2g53nblgblaah9if-gnutar-1.34
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: tar
+  old_store_path: /nix/store/03rn2bin3r2dlknx2g53nblgblaah9if-gnutar-1.34
+  store_name: gnutar-1.34
+- archive:
+    name: gzip-1.12-j4i5b.nar.xz
+    sha256: b203cf84ac8219595ea91316e3f3038cec11cf1db4b076db14ef8d1c9585d440
+    uncompressed_size: 147480
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/j4i5bfkjr96l099yry6mv4gylwkl5sby-gzip-1.12
+  exported: true
+  name: gzip
+  old_store_path: /nix/store/j4i5bfkjr96l099yry6mv4gylwkl5sby-gzip-1.12
+  store_name: gzip-1.12
+- archive:
+    name: bzip2-1.0.8-3x43s.nar.xz
+    sha256: cbd3cf40cdb1fba366b4d44ab41a977d6348ea21e2d1a33a3abe49044e693b8d
+    uncompressed_size: 81080
+  dependent:
+  - /nix/store/3x43sy1h8ybkraxwsw2mz5ckr3yxal33-bzip2-1.0.8
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: bzip2-1.0.8-3x43s
+  old_store_path: /nix/store/3x43sy1h8ybkraxwsw2mz5ckr3yxal33-bzip2-1.0.8
+  store_name: bzip2-1.0.8
+- archive:
+    name: bzip2-1.0.8-bin-0hxsx.nar.xz
+    sha256: 7d37960d9f1b95892c311efa799908a5ebcffd29855eff20d14076512483cdc4
+    uncompressed_size: 69224
+  dependent:
+  - /nix/store/3x43sy1h8ybkraxwsw2mz5ckr3yxal33-bzip2-1.0.8
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: bzip2
+  old_store_path: /nix/store/0hxsx02jxvqsjy1l36llh8cbbrz1qi0b-bzip2-1.0.8-bin
+  store_name: bzip2-1.0.8-bin
+- archive:
+    name: gnumake-4.3-b4h5n.nar.xz
+    sha256: 8aacd32f8e72b9b1a894b5f6539a3d126ff33be4ee0e403648d12d3055178a60
+    uncompressed_size: 281880
+  dependent:
+  - /nix/store/b4h5nkc7yjrq0y56p0nk1djk3qmwqx3m-gnumake-4.3
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: make
+  old_store_path: /nix/store/b4h5nkc7yjrq0y56p0nk1djk3qmwqx3m-gnumake-4.3
+  store_name: gnumake-4.3
+- archive:
+    name: patch-2.7.6-0jw8j.nar.xz
+    sha256: 9a0ad4193f410f9ec9e8548de7abcfc607228ab5e8712367817f47ead7e94ef9
+    uncompressed_size: 239384
+  dependent:
+  - /nix/store/0jw8jm9plqnb365mxkbzrci6phya8zxf-patch-2.7.6
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: patch
+  old_store_path: /nix/store/0jw8jm9plqnb365mxkbzrci6phya8zxf-patch-2.7.6
+  store_name: patch-2.7.6
+- archive:
+    name: patchelf-0.15.0-k27m6.nar.xz
+    sha256: 2d205b477d4ea31526065a6a84b5de4c64ac9a8f9a5109041266f5d56ff7304e
+    uncompressed_size: 220736
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: true
+  name: patchelf
+  old_store_path: /nix/store/k27m64h9g0ab53lf5qd553xvxv6jxg8i-patchelf-0.15.0
+  store_name: patchelf-0.15.0
+- archive:
+    name: zlib-1.2.13-3ir1m.nar.xz
+    sha256: 69095721cfd837ccbe22c4b088b77f32432a7cedad8e8a7e6ef7fefa3c40c757
+    uncompressed_size: 140592
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: zlib-1.2.13-3ir1m
+  old_store_path: /nix/store/3ir1mphikxajm81bba2k0jx11hqkkcnd-zlib-1.2.13
+  store_name: zlib-1.2.13
+- archive:
+    name: gcc-11.3.0-lib-7r7da.nar.xz
+    sha256: 840ccaf27cd14aa7326e7852bf089ff31b6c10d3a9c377f3ec078ca70f919601
+    uncompressed_size: 4107560
+  dependent:
+  - /nix/store/7r7das3956z3fkfp9xrgal5m551f2vrm-gcc-11.3.0-lib
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: gcc-lib
+  old_store_path: /nix/store/7r7das3956z3fkfp9xrgal5m551f2vrm-gcc-11.3.0-lib
+  store_name: gcc-11.3.0-lib
+- archive:
+    name: linux-headers-6.0-pzisr.nar.xz
+    sha256: d4320cd9794c7c2a3422eb29204d772d7ff7aefdf71c32232d5907c219946f28
+    uncompressed_size: 6310336
+  dependent: []
+  exported: false
+  name: linux-headers-6.0-pzisr
+  old_store_path: /nix/store/pzisrhlcw5mqbqgmnwv65bjk2lhz2fp3-linux-headers-6.0
+  store_name: linux-headers-6.0
+- archive:
+    name: musl-1.2.3-dev-qxda2.nar.xz
+    sha256: e6b390cd8f88daf75c96e186d3cb2fce02cd26f6b2b394c303527551e42aeabd
+    uncompressed_size: 569264
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/pzisrhlcw5mqbqgmnwv65bjk2lhz2fp3-linux-headers-6.0
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  exported: false
+  name: musl-1.2.3-dev-qxda2
+  old_store_path: /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  store_name: musl-1.2.3-dev
+- archive:
+    name: gcc-11.3.0-nv4ki.nar.xz
+    sha256: 8f25c742dd085eb57c624a5a409f43f7c2f295cf4959f71d11b62b1ee74fa1c5
+    uncompressed_size: 127925120
+  dependent:
+  - /nix/store/3ir1mphikxajm81bba2k0jx11hqkkcnd-zlib-1.2.13
+  - /nix/store/7r7das3956z3fkfp9xrgal5m551f2vrm-gcc-11.3.0-lib
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/nv4kiizx3828g6jvbfk5dnxg72cvv6iz-gcc-11.3.0
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  exported: true
+  name: gcc
+  old_store_path: /nix/store/nv4kiizx3828g6jvbfk5dnxg72cvv6iz-gcc-11.3.0
+  store_name: gcc-11.3.0
+- archive:
+    name: libffi-3.4.4-0ij4c.nar.xz
+    sha256: 5beed0bd513681ec95a60eb72dbace3c91640675252d07d6f6fec3b1501b5e01
+    uncompressed_size: 125872
+  dependent:
+  - /nix/store/0ij4cq47bav1rd3sa8n0xh268nra6xac-libffi-3.4.4
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: libffi-3.4.4-0ij4c
+  old_store_path: /nix/store/0ij4cq47bav1rd3sa8n0xh268nra6xac-libffi-3.4.4
+  store_name: libffi-3.4.4
+- archive:
+    name: expand-response-params-9wjz7.nar.xz
+    sha256: 7d1774be41852c6b9f87228611bd8b2a946dc8bd4cd401d932132439d25a3fbb
+    uncompressed_size: 17032
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: expand-response-params-9wjz7
+  old_store_path: /nix/store/9wjz71060x39g6kcx5zvyn43pny4zbqp-expand-response-params
+  store_name: expand-response-params
+- archive:
+    name: binutils-2.39-hg6mx.nar.xz
+    sha256: 60677dc6412943521f57c424799c9a7cec9c5507651e5913652faeecd69ceb4a
+    uncompressed_size: 31992112
+  dependent:
+  - /nix/store/3ir1mphikxajm81bba2k0jx11hqkkcnd-zlib-1.2.13
+  - /nix/store/hg6mx1hb2jj6199rlcybs5mnl31gay3a-binutils-2.39
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: false
+  name: binutils-2.39-hg6mx
+  old_store_path: /nix/store/hg6mx1hb2jj6199rlcybs5mnl31gay3a-binutils-2.39
+  store_name: binutils-2.39
+- archive:
+    name: binutils-wrapper-2.39-1pcxc.nar.xz
+    sha256: c8e3359efdc615d91457d62ce3645cdae53ac76d32f6fdc816a4d403b807504c
+    uncompressed_size: 49632
+  dependent:
+  - /nix/store/1pcxcirnfn9wk7vh0an02s9s2gj12bq1-binutils-wrapper-2.39
+  - /nix/store/9wjz71060x39g6kcx5zvyn43pny4zbqp-expand-response-params
+  - /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  - /nix/store/hg6mx1hb2jj6199rlcybs5mnl31gay3a-binutils-2.39
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  - /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  exported: false
+  name: binutils-wrapper-2.39-1pcxc
+  old_store_path: /nix/store/1pcxcirnfn9wk7vh0an02s9s2gj12bq1-binutils-wrapper-2.39
+  store_name: binutils-wrapper-2.39
+- archive:
+    name: gmp-with-cxx-6.2.1-jcq5x.nar.xz
+    sha256: 0229c62da5abe6829c21b8fe4daa9b1a69c18294b0b0a03e5d85844887f49ac6
+    uncompressed_size: 2443512
+  dependent:
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jcq5xcnzxgly7329y8bmlhh4alggmaln-gmp-with-cxx-6.2.1
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: false
+  name: gmp-with-cxx-6.2.1-jcq5x
+  old_store_path: /nix/store/jcq5xcnzxgly7329y8bmlhh4alggmaln-gmp-with-cxx-6.2.1
+  store_name: gmp-with-cxx-6.2.1
+- archive:
+    name: gmp-with-cxx-6.2.1-dev-ah90w.nar.xz
+    sha256: 8e0277934e53b7e99aa43ef607714e95ccc2e5473e217a48866f66d02a79ebac
+    uncompressed_size: 215704
+  dependent:
+  - /nix/store/ah90wg7zrhhsj376mrp5w94v0rk271x0-gmp-with-cxx-6.2.1-dev
+  - /nix/store/jcq5xcnzxgly7329y8bmlhh4alggmaln-gmp-with-cxx-6.2.1
+  exported: false
+  name: gmp-with-cxx-6.2.1-dev-ah90w
+  old_store_path: /nix/store/ah90wg7zrhhsj376mrp5w94v0rk271x0-gmp-with-cxx-6.2.1-dev
+  store_name: gmp-with-cxx-6.2.1-dev
+- archive:
+    name: ghc-musl-9.4.3-doc-bkakv.nar.xz
+    sha256: a9160556cd1e2186d2d5e178dbec79d458040373506da7d123059e65447d13e1
+    uncompressed_size: 708462120
+  dependent:
+  - /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  exported: false
+  name: ghc-musl-9.4.3-doc-bkakv
+  old_store_path: /nix/store/bkakv4m7gcaqn38j4xfma96yg5pqbkrd-ghc-musl-9.4.3-doc
+  store_name: ghc-musl-9.4.3-doc
+- archive:
+    name: libffi-3.4.4-dev-bxklm.nar.xz
+    sha256: 5b4c0e3c58c0bd11acb0f53386f67f14ced319780c0c5ff0fdb96ead4598f493
+    uncompressed_size: 21248
+  dependent:
+  - /nix/store/0ij4cq47bav1rd3sa8n0xh268nra6xac-libffi-3.4.4
+  - /nix/store/bxklm0falb12sh90w3y37bay1iyc1l1v-libffi-3.4.4-dev
+  exported: false
+  name: libffi-3.4.4-dev-bxklm
+  old_store_path: /nix/store/bxklm0falb12sh90w3y37bay1iyc1l1v-libffi-3.4.4-dev
+  store_name: libffi-3.4.4-dev
+- archive:
+    name: gcc-11.3.0-ly777.nar.xz
+    sha256: de9f35e49dc14e47c51dc7d82b4a106d8a8e7965e9bffd9c47b75a640eb9e47c
+    uncompressed_size: 194077832
+  dependent:
+  - /nix/store/3ir1mphikxajm81bba2k0jx11hqkkcnd-zlib-1.2.13
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/ly777argzx3dhfpzz4xn0w2gcr4cb4x7-gcc-11.3.0
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: false
+  name: gcc-11.3.0-ly777
+  old_store_path: /nix/store/ly777argzx3dhfpzz4xn0w2gcr4cb4x7-gcc-11.3.0
+  store_name: gcc-11.3.0
+- archive:
+    name: gcc-wrapper-11.3.0-f55xm.nar.xz
+    sha256: 97f125ceacfaea91abfcff59fe379332110fe8fcd5e895f29b7927e1d4786737
+    uncompressed_size: 56536
+  dependent:
+  - /nix/store/1pcxcirnfn9wk7vh0an02s9s2gj12bq1-binutils-wrapper-2.39
+  - /nix/store/9wjz71060x39g6kcx5zvyn43pny4zbqp-expand-response-params
+  - /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  - /nix/store/f55xmhwvvwsswpzd1and414532p7c379-gcc-wrapper-11.3.0
+  - /nix/store/i380zsb8n6byh11sb0nzdl1lbni373d0-gnugrep-3.7
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/ly777argzx3dhfpzz4xn0w2gcr4cb4x7-gcc-11.3.0
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  - /nix/store/x2md26zzlinzvfmayd9p1rm0212dn2ig-coreutils-9.1
+  exported: false
+  name: gcc-wrapper-11.3.0-f55xm
+  old_store_path: /nix/store/f55xmhwvvwsswpzd1and414532p7c379-gcc-wrapper-11.3.0
+  store_name: gcc-wrapper-11.3.0
+- archive:
+    name: ncurses-6.3-p20220507-i7lkl.nar.xz
+    sha256: b44ec555fc379515de6a340a25a77fb59f3ea55077a8653f303e97139ed382e8
+    uncompressed_size: 3677544
+  dependent:
+  - /nix/store/i7lklsi70wjsp7mab97gzpfjxik8hspj-ncurses-6.3-p20220507
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: false
+  name: ncurses-6.3-p20220507-i7lkl
+  old_store_path: /nix/store/i7lklsi70wjsp7mab97gzpfjxik8hspj-ncurses-6.3-p20220507
+  store_name: ncurses-6.3-p20220507
+- archive:
+    name: musl-iconv-1.2.3-lgcip.nar.xz
+    sha256: a65d264679cbaa9b6e2b0ba4f44ee3b6de344459ab0dadf86c823fea999388b4
+    uncompressed_size: 528
+  dependent:
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  exported: false
+  name: musl-iconv-1.2.3-lgcip
+  old_store_path: /nix/store/lgcipim9n3318m0rccam8ypzljnj6i6h-musl-iconv-1.2.3
+  store_name: musl-iconv-1.2.3
+- archive:
+    name: ghc-musl-9.4.3-65mf4.nar.xz
+    sha256: 02e41c564ac9fa096bd2f5228515278811a3d0b526ec55aec7eb55a2a548b808
+    uncompressed_size: 1732351464
+  dependent:
+  - /nix/store/0ij4cq47bav1rd3sa8n0xh268nra6xac-libffi-3.4.4
+  - /nix/store/1pcxcirnfn9wk7vh0an02s9s2gj12bq1-binutils-wrapper-2.39
+  - /nix/store/65mf4qddq8q37vf7lf0rirhvg0wlrpi1-ghc-musl-9.4.3
+  - /nix/store/ah90wg7zrhhsj376mrp5w94v0rk271x0-gmp-with-cxx-6.2.1-dev
+  - /nix/store/bkakv4m7gcaqn38j4xfma96yg5pqbkrd-ghc-musl-9.4.3-doc
+  - /nix/store/bxklm0falb12sh90w3y37bay1iyc1l1v-libffi-3.4.4-dev
+  - /nix/store/dl1r8xadj8g8871vl4bv9njhma7czszf-bash-5.1-p16
+  - /nix/store/f55xmhwvvwsswpzd1and414532p7c379-gcc-wrapper-11.3.0
+  - /nix/store/hg6mx1hb2jj6199rlcybs5mnl31gay3a-binutils-2.39
+  - /nix/store/i7lklsi70wjsp7mab97gzpfjxik8hspj-ncurses-6.3-p20220507
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jcq5xcnzxgly7329y8bmlhh4alggmaln-gmp-with-cxx-6.2.1
+  - /nix/store/lgcipim9n3318m0rccam8ypzljnj6i6h-musl-iconv-1.2.3
+  - /nix/store/qxda26fm252aaxg8gi5nhp04gcgfy12p-musl-1.2.3-dev
+  - /nix/store/vwbzm31xvl5h5h2hclma3wiy582850k3-gcc-11.3.0-lib
+  exported: true
+  name: ghc
+  old_store_path: /nix/store/65mf4qddq8q37vf7lf0rirhvg0wlrpi1-ghc-musl-9.4.3
+  store_name: ghc-musl-9.4.3
+- archive:
+    name: hsnixpkgs-builderlib-boot-0.1.0.0-doc-bk0k6.nar.xz
+    sha256: 33450ac760d0645721bd439c2ba52d07e59c588d21d1bde238b9b4c027afb57e
+    uncompressed_size: 926336
+  dependent:
+  - /nix/store/bkakv4m7gcaqn38j4xfma96yg5pqbkrd-ghc-musl-9.4.3-doc
+  exported: false
+  name: hsnixpkgs-builderlib-boot-0.1.0.0-doc-bk0k6
+  old_store_path: /nix/store/bk0k69881y6xanv7fbh5pdrlgxqjbd4d-hsnixpkgs-builderlib-boot-0.1.0.0-doc
+  store_name: hsnixpkgs-builderlib-boot-0.1.0.0-doc
+- archive:
+    name: hsnixpkgs-builderlib-boot-0.1.0.0-1aznj.nar.xz
+    sha256: 28957203fd6a9f5618e68546c84465e6fe0208689592b06a41b4934126b84c08
+    uncompressed_size: 3471720
+  dependent:
+  - /nix/store/0ij4cq47bav1rd3sa8n0xh268nra6xac-libffi-3.4.4
+  - /nix/store/1aznjnvnzxjdfjriyr3k7h01jqjasfma-hsnixpkgs-builderlib-boot-0.1.0.0
+  - /nix/store/65mf4qddq8q37vf7lf0rirhvg0wlrpi1-ghc-musl-9.4.3
+  - /nix/store/bk0k69881y6xanv7fbh5pdrlgxqjbd4d-hsnixpkgs-builderlib-boot-0.1.0.0-doc
+  - /nix/store/i7lklsi70wjsp7mab97gzpfjxik8hspj-ncurses-6.3-p20220507
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  - /nix/store/jcq5xcnzxgly7329y8bmlhh4alggmaln-gmp-with-cxx-6.2.1
+  - /nix/store/lgcipim9n3318m0rccam8ypzljnj6i6h-musl-iconv-1.2.3
+  exported: true
+  name: builderlib-boot
+  old_store_path: /nix/store/1aznjnvnzxjdfjriyr3k7h01jqjasfma-hsnixpkgs-builderlib-boot-0.1.0.0
+  store_name: hsnixpkgs-builderlib-boot-0.1.0.0
+- archive:
+    name: binutils-2.39-5bmgb.nar.xz
+    sha256: a8c98341b3083c0c5be6587ca7e113fb2c73607e94b295ff24a5ad89b4fb9f2a
+    uncompressed_size: 38290288
+  dependent:
+  - /nix/store/3ir1mphikxajm81bba2k0jx11hqkkcnd-zlib-1.2.13
+  - /nix/store/5bmgbxn5f3wmzdmirmns6zxp635iriqj-binutils-2.39
+  - /nix/store/j4hzbbpzdw8f5pqxcv53glklslkc2964-musl-1.2.3
+  exported: true
+  name: binutils
+  old_store_path: /nix/store/5bmgbxn5f3wmzdmirmns6zxp635iriqj-binutils-2.39
+  store_name: binutils-2.39
+- archive:
+    name: busybox-1.35.0-d49q3.nar.xz
+    sha256: 998f3d3c0271ca9007a35c3e89f4ff5ca9f6cd1562241b5a452f057c7a31dd72
+    uncompressed_size: 197552
+  dependent:
+  - /nix/store/d49q3sgid0k7yyc5ks16asfcdfjy5r7i-busybox-1.35.0
+  exported: true
+  name: busybox
+  old_store_path: /nix/store/d49q3sgid0k7yyc5ks16asfcdfjy5r7i-busybox-1.35.0
+  store_name: busybox-1.35.0

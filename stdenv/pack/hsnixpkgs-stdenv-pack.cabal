@@ -13,7 +13,6 @@ library
         HsNixPkgs.BootTools.ReferenceGraph
         HsNixPkgs.BootTools.StorePath
         HsNixPkgs.BootTools.SupportTools
-        HsNixPkgs.BootTools.Type
 
     hs-source-dirs:     src
     default-language:   Haskell2010
@@ -30,13 +29,30 @@ library
         filepath ^>=1.4.100,
         directory ^>=1.3.8,
         mtl ^>=2.2,
+        async ^>=2.2,
         hashable ^>=1.4.2,
         unordered-containers ^>=0.2,
         lzma,
         binary ^>=0.8,
-        aeson ^>=2.1,
         cryptonite >=0.29 && <0.31,
-        nix-archive
+        nix-archive,
+        hsnixpkgs-stdenv-pack:types
+
+library types
+    exposed-modules:  HsNixPkgs.BootTools.Types
+    visibility:       public
+    hs-source-dirs:   types
+    default-language: Haskell2010
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wincomplete-record-updates
+        -Wincomplete-uni-patterns -Wmissing-export-lists
+        -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+
+    build-depends:
+        base,
+        text,
+        aeson ^>=2.1,
+        cryptonite
 
 executable pack-stdenv-linux
     main-is:            Main.hs
@@ -47,6 +63,7 @@ executable pack-stdenv-linux
         -Wall -Wcompat -Widentities -Wincomplete-record-updates
         -Wincomplete-uni-patterns -Wmissing-export-lists
         -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+        -threaded -rtsopts -with-rtsopts=-N
 
     build-depends:
         base ^>=4.17,

@@ -50,7 +50,7 @@ systemLib = do
         { libName = LSubLibName "system",
           exposedModules = [exposedM],
           libBuildInfo =
-            (simpleBuildInfo srcRoot ghcOptions)
+            (simpleBuildInfo srcRoot mempty)
               { defaultExtensions =
                   fmap
                     EnableExtension
@@ -151,7 +151,10 @@ unpackTHLib =
                     unorderedContainersDep,
                     "yaml" ^>= [0, 11],
                     "template-haskell" ^>= [2, 19],
-                    anyVersionDep "hsnixpkgs-stdenv-pack",
+                    Dependency
+                      "hsnixpkgs-stdenv-pack"
+                      anyVersion
+                      (NES.singleton (LSubLibName "types")),
                     Dependency
                       "hsnix-core"
                       anyVersion

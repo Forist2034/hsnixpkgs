@@ -1,4 +1,4 @@
-{ mkDerivation, aeson, base, binary, bytestring, cryptonite
+{ mkDerivation, aeson, async, base, binary, bytestring, cryptonite
 , directory, filepath, hashable, lib, lzma, mtl, nix-archive, text
 , unordered-containers, yaml
 }:
@@ -9,8 +9,8 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base binary bytestring cryptonite directory filepath hashable
-    lzma mtl nix-archive text unordered-containers
+    aeson async base binary bytestring cryptonite directory filepath
+    hashable lzma mtl nix-archive text unordered-containers
   ];
   executableHaskellDepends = [
     base bytestring directory filepath text yaml
@@ -19,6 +19,7 @@ mkDerivation {
     rm LICENSE
     cp ${../../LICENSE} LICENSE
     '';
+  doHaddock = false;
   license = lib.licenses.mit;
   mainProgram = "pack-stdenv-linux";
 }

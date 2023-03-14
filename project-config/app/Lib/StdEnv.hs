@@ -1,5 +1,7 @@
 module Lib.StdEnv (stdEnvPack, stdenvUnpack) where
 
+import qualified Distribution.Compat.NonEmptySet as NES
+import Distribution.Compiler
 import Distribution.PackageDescription
 import qualified Distribution.System as Sys
 import Distribution.Version
@@ -45,7 +47,27 @@ stdEnvPack =
         [ EnableExtension OverloadedStrings,
           EnableExtension Strict
         ]
+      exeOpts =
+        PerCompilerFlavor
+          ["-threaded", "-rtsopts", "-with-rtsopts=-N"]
+          []
    in withCurrentDirectory root $ do
+        types <-
+          addLibraryMod
+            ( emptyLibrary
+                { libName = LSubLibName "types",
+                  libVisibility = LibraryVisibilityPublic,
+                  libBuildInfo =
+                    (simpleBuildInfo "types" mempty)
+                      { targetBuildDepends =
+                          [ anyVersionDep "base",
+                            anyVersionDep "text",
+                            "aeson" ^>= [2, 1],
+                            anyVersionDep "cryptonite"
+                          ]
+                      }
+                }
+            )
         lib <-
           addLibraryMod
             ( emptyLibrary
@@ -55,13 +77,14 @@ stdEnvPack =
                         targetBuildDepends =
                           commonDeps
                             ++ [ "mtl" ^>= [2, 2],
+                                 "async" ^>= [2, 2],
                                  "hashable" ^>= [1, 4, 2],
                                  "unordered-containers" ^>= [0, 2],
                                  anyVersionDep "lzma",
                                  "binary" ^>= [0, 8],
-                                 "aeson" ^>= [2, 1],
                                  "cryptonite" @@ [versionRangeQ| >= 0.29 && < 0.31 |],
-                                 anyVersionDep "nix-archive"
+                                 anyVersionDep "nix-archive",
+                                 Dependency name anyVersion (NES.singleton (libName types))
                                ]
                       }
                 }
@@ -71,7 +94,7 @@ stdEnvPack =
                 { exeName = "pack-stdenv-linux",
                   modulePath = "Main.hs",
                   buildInfo =
-                    (simpleBuildInfo ("app" </> "linux") mempty)
+                    (simpleBuildInfo ("app" </> "linux") exeOpts)
                       { defaultExtensions = commonExts,
                         targetBuildDepends =
                           commonDeps
@@ -88,6 +111,7 @@ stdEnvPack =
                   emptyGenericPackageDescription
                     { packageDescription = simplePkgDesc name [0, 1, 0, 0],
                       condLibrary = Just (unConditional lib),
+                      condSubLibraries = [unConditionalSubLib types],
                       condExecutables =
                         [ (exeName linuxExe, condOSExe Sys.Linux linuxExe)
                         ]

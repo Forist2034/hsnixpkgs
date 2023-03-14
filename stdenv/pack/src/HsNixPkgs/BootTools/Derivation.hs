@@ -1,96 +1,75 @@
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TemplateHaskell #-}
 
-module HsNixPkgs.BootTools.Derivation (
-  Hash (..),
-  DerivArchive (..),
-  BootDeriv (..),
-  packDerivations,
-) where
+module HsNixPkgs.BootTools.Derivation (packDerivations) where
 
 import Codec.Compression.Lzma
+import Control.Concurrent
+import Control.Concurrent.Async
 import Control.Monad.IO.Class
 import Control.Monad.State.Strict
 import Crypto.Hash
-import qualified Data.Aeson as JSON
-import Data.Aeson.TH (Options (fieldLabelModifier), deriveJSON)
 import Data.Binary
 import qualified Data.ByteString.Lazy as LBS
 import Data.Foldable
 import Data.Functor
-import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import HsNixPkgs.BootTools.ReferenceGraph
 import HsNixPkgs.BootTools.StorePath
-import HsNixPkgs.BootTools.Type
+import HsNixPkgs.BootTools.Types
 import Nix.Nar
 import System.FilePath
 import System.OsPath.Posix (encodeUtf)
 
-data DerivArchive = DerivArchive
-  { daName :: Text,
-    daSha256 :: Hash,
-    daUncompressedSize :: Word64
+newtype LogInfo = LogInfo
+  { liNum :: Text
   }
 
-deriveJSON
-  JSON.defaultOptions {fieldLabelModifier = JSON.camelTo2 '-' . drop 2}
-  ''DerivArchive
-
-data BootDeriv = BootDeriv
-  { bdName :: Text,
-    bdStoreName :: Text,
-    bdExported :: Bool,
-    bdArchive :: DerivArchive,
-    bdOldStorePath :: Text,
-    bdDependent :: [Text]
+data LogMessage = LogMessage
+  { lmId :: Int,
+    lmName :: Text,
+    lmMsg :: Text
   }
 
-deriveJSON
-  JSON.defaultOptions {fieldLabelModifier = JSON.camelTo2 '-' . drop 2}
-  ''BootDeriv
-
-type PackM = StateT (HM.HashMap Text (Digest SHA256)) IO
-
-data LogInfo = LogInfo
-  { liNameWidth :: Int,
-    liNum :: Text
-  }
-
-type LogItem = (Text, Int)
-
-writeLog :: MonadIO m => LogInfo -> LogItem -> Text -> m ()
-writeLog li (n, i) msg =
-  liftIO
-    ( TIO.putStrLn
+logger :: LogInfo -> Chan (Maybe LogMessage) -> IO ()
+logger li c =
+  readChan c >>= \case
+    Just msg ->
+      TIO.putStrLn
         ( mconcat
             [ "[",
-              T.justifyLeft (T.length (liNum li)) ' ' (T.pack (show i)),
+              T.justifyRight (T.length (liNum li)) ' ' (T.pack (show (lmId msg))),
               " of ",
               liNum li,
               "] ",
-              T.justifyLeft (liNameWidth li) ' ' n,
+              lmName msg,
               "> ",
-              msg
+              lmMsg msg
             ]
         )
-    )
+        >> logger li c
+    Nothing -> pure ()
+
+data ArchiveArg = ArchiveArg
+  { aaId :: Int,
+    aaNode :: GraphNode,
+    aaSP :: StorePath,
+    aaHashSuf :: Text
+  }
 
 archiveDerivation ::
-  LogInfo ->
-  LogItem ->
+  Chan (Maybe LogMessage) ->
   FilePath ->
-  Text ->
-  StorePath ->
-  PackM (DerivArchive, Text)
-archiveDerivation li lt dest p sp = do
-  writeLog li lt ("Packing nar of " <> p)
+  ArchiveArg ->
+  IO DerivArchive
+archiveDerivation lg dest aa = do
+  let p = storePath (aaNode aa)
+  writeLog ("Packing nar of " <> p)
   nar <- encode <$> liftIO (readNar (fromJust (encodeUtf (T.unpack p))))
-  writeLog li lt "Compressing nar"
+  writeLog "Compressing nar"
   let compressed =
         compressWith
           ( defaultCompressParams
@@ -100,69 +79,87 @@ archiveDerivation li lt dest p sp = do
           )
           nar
       hsh = hashlazy compressed
-  hash_suf <- getName 5 (T.pack (show hsh)) hsh
-  let filename = storePathName sp <> "-" <> hash_suf <> ".nar.xz"
+  let filename = storePathName (aaSP aa) <> "-" <> aaHashSuf aa <> ".nar.xz"
       path = dest </> T.unpack filename
-  writeLog li lt ("Writing compressed nar to " <> T.pack path)
+  writeLog ("Writing compressed nar to " <> T.pack path)
   liftIO (LBS.writeFile (dest </> T.unpack filename) compressed)
   pure
-    ( DerivArchive
-        { daName = filename,
-          daSha256 = Hash hsh,
-          daUncompressedSize = fromIntegral (LBS.length nar)
-        },
-      hash_suf
-    )
+    DerivArchive
+      { daName = filename,
+        daSha256 = Hash hsh,
+        daUncompressedSize = fromIntegral (LBS.length nar)
+      }
   where
-    getName :: Int -> Text -> Digest SHA256 -> PackM Text
-    getName n t d =
+    writeLog m =
+      writeChan
+        lg
+        ( Just
+            LogMessage
+              { lmId = aaId aa,
+                lmName = storePathName (aaSP aa),
+                lmMsg = m
+              }
+        )
+
+toArchiveArg :: Text -> [GraphNode] -> [ArchiveArg]
+toArchiveArg store gns =
+  evalState
+    ( zipWithM
+        ( \idx gn ->
+            let sp = parseStorePath store (storePath gn)
+             in getName 5 (storePathHash sp) <&> \suf ->
+                  ArchiveArg
+                    { aaId = idx,
+                      aaNode = gn,
+                      aaSP = sp,
+                      aaHashSuf = suf
+                    }
+        )
+        [1, 2 ..]
+        gns
+    )
+    HS.empty
+  where
+    getName :: Int -> Text -> State (HS.HashSet Text) Text
+    getName n t =
       let short = T.take n t
-       in gets (HM.member short) >>= \case
-            True -> getName (n + 5) t d
+       in gets (HS.member short) >>= \case
+            True -> getName (n + 5) t
             False ->
-              modify (HM.insert short d)
+              modify (HS.insert short)
                 $> short
 
 packDerivations :: Text -> FilePath -> [GraphNode] -> IO [BootDeriv]
 packDerivations store dest gns = do
   TIO.putStrLn "These derivations with be packed:"
   traverse_ (\gn -> TIO.putStrLn ("    " <> storePath gn)) gns
-  evalStateT
-    ( let withSP =
-            zipWith
-              ( \idx gn ->
-                  let sp = parseStorePath store (storePath gn)
-                   in ((storePathName sp, idx), (gn, sp))
-              )
-              [1, 2 ..]
-              gns
-          logInfo =
-            LogInfo
-              { liNameWidth = maximum (fmap (\((n, _), _) -> T.length n) withSP),
-                liNum = T.pack (show (length gns))
-              }
-       in traverse
-            ( \(lt, (gn, sp)) ->
-                ( \(da, suf) ->
-                    BootDeriv
-                      { bdName =
-                          fromMaybe
-                            (storePathName sp <> "-" <> suf)
-                            (exportedName gn),
-                        bdStoreName = storePathName sp,
-                        bdExported = isJust (exportedName gn),
-                        bdArchive = da,
-                        bdOldStorePath = storePath gn,
-                        bdDependent = dependencies gn
-                      }
-                )
-                  <$> archiveDerivation
-                    logInfo
-                    lt
-                    dest
-                    (storePath gn)
-                    sp
-            )
-            withSP
+
+  lc <- newChan
+  void
+    ( forkIO
+        ( logger LogInfo {liNum = T.pack (show (length gns))} lc
+        )
     )
-    HM.empty
+
+  mapConcurrently
+    ( \aa@ArchiveArg {aaSP = sp, aaNode = gn} ->
+        ( \da ->
+            BootDeriv
+              { bdName =
+                  fromMaybe
+                    (storePathName sp <> "-" <> aaHashSuf aa)
+                    (exportedName gn),
+                bdStoreName = storePathName sp,
+                bdExported = isJust (exportedName gn),
+                bdArchive = da,
+                bdOldStorePath = storePath gn,
+                bdDependent = dependencies gn
+              }
+        )
+          <$> archiveDerivation
+            lc
+            dest
+            aa
+    )
+    (toArchiveArg store gns)
+    <* writeChan lc Nothing
